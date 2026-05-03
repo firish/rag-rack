@@ -8,7 +8,6 @@ import pytest
 from verifiable_rag.models.document import Document, Paragraph, Section, Sentence
 from verifiable_rag.models.span import Span
 
-
 DOC_ID = "test-doc-001"
 
 

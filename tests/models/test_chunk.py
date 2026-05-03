@@ -4,7 +4,6 @@ import pytest
 from verifiable_rag.models.chunk import Chunk, RetrievedChunk
 from verifiable_rag.models.span import Span
 
-
 DOC_ID = "chunk-test-doc"
 
 

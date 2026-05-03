@@ -7,7 +7,14 @@ from verifiable_rag.chunkers import Chunker
 from verifiable_rag.embedders import Embedder
 from verifiable_rag.generators import Generator
 from verifiable_rag.indexers import HybridIndex
-from verifiable_rag.models.answer import Answer, FaithfulnessComponents, Strictness
+from verifiable_rag.models.answer import (
+    Answer,
+    CitedSentence,
+    FaithfulnessComponents,
+    Strictness,
+    VerificationResult,
+)
+from verifiable_rag.models.chunk import RetrievedChunk
 from verifiable_rag.models.document import Document
 from verifiable_rag.parsers import Parser
 from verifiable_rag.rerankers import Reranker
@@ -81,9 +88,9 @@ class Pipeline:
     def _build_answer(
         self,
         query: str,
-        cited_sentences: list,
-        verification_results: list,
-        retrieved: list,
+        cited_sentences: list[CitedSentence],
+        verification_results: list[VerificationResult],
+        retrieved: list[RetrievedChunk],
     ) -> Answer:
         threshold = _STRICTNESS_THRESHOLDS[self.strictness]
 

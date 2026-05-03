@@ -1,0 +1,3 @@
+# Drop a small PDF (10-25 pages, text-based) named `sample.pdf` here to enable
+# the end-to-end docling integration test.  Real PDFs are gitignored — see
+# .gitignore in the repo root.

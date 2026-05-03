@@ -19,6 +19,33 @@ class Parser(Protocol):
 
         Raises:
             FileNotFoundError: if *path* does not exist.
-            ValueError: if the file format is unsupported.
+            ValueError: if the file format is unsupported or contains no text.
         """
         ...
+
+
+# Concrete implementations and helpers — imported lazily-friendly: the imports
+# below succeed without docling/wtpsplit installed (those deps are only loaded
+# when the parser actually runs).
+from verifiable_rag.parsers._cache import (  # noqa: E402
+    DEFAULT_CACHE_DIR,
+    CachingParser,
+    DocumentCache,
+    file_content_hash,
+)
+from verifiable_rag.parsers._sentence_splitter import (  # noqa: E402
+    SentenceSpan,
+    SentenceSplitter,
+)
+from verifiable_rag.parsers.docling_parser import DoclingParser  # noqa: E402
+
+__all__ = [
+    "Parser",
+    "DoclingParser",
+    "CachingParser",
+    "DocumentCache",
+    "DEFAULT_CACHE_DIR",
+    "SentenceSplitter",
+    "SentenceSpan",
+    "file_content_hash",
+]

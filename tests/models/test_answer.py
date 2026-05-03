@@ -5,7 +5,6 @@ from verifiable_rag.models.answer import (
     Answer,
     CitedSentence,
     FaithfulnessComponents,
-    VerificationResult,
 )
 
 

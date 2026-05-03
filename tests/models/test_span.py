@@ -7,7 +7,6 @@ import pytest
 
 from verifiable_rag.models.span import BBox, PageBBox, Span
 
-
 DOC = "doc-001"
 
 

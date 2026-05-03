@@ -10,17 +10,19 @@ Loaders to implement in Phase 0:
 """
 from __future__ import annotations
 
+from typing import Any
 
-def load_litqa2(cache_dir: str = "benchmarks/data/litqa2") -> list[dict]:  # type: ignore[return]
+
+def load_litqa2(cache_dir: str = "benchmarks/data/litqa2") -> list[dict[str, Any]]:
     """Load LitQA2 benchmark. Stub — implement in Phase 0."""
     raise NotImplementedError("Implement LitQA2 loader in Phase 0")
 
 
-def load_ragtruth(cache_dir: str = "benchmarks/data/ragtruth") -> list[dict]:  # type: ignore[return]
+def load_ragtruth(cache_dir: str = "benchmarks/data/ragtruth") -> list[dict[str, Any]]:
     """Load RAGTruth benchmark. Stub — implement in Phase 0."""
     raise NotImplementedError("Implement RAGTruth loader in Phase 0")
 
 
-def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict]:  # type: ignore[return]
+def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict[str, Any]]:
     """Load HaluBench benchmark. Stub — implement in Phase 0."""
     raise NotImplementedError("Implement HaluBench loader in Phase 0")

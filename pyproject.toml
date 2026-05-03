@@ -85,6 +85,8 @@ exclude = ["tests"]
 [[tool.mypy.overrides]]
 module = [
     "docling.*",
+    "docling_core.*",
+    "wtpsplit.*",
     "fitz.*",
     "lancedb.*",
     "bm25s.*",

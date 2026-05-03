@@ -27,10 +27,14 @@ htmlcov/
 
 # Index and model cache
 .verifiable_rag_index/
+.verifiable_rag_cache/
 .cache/
 
 # Benchmark datasets (downloaded at runtime, not committed)
 benchmarks/data/
+
+# Test PDFs — drop your own at tests/parsers/fixtures/sample.pdf; never commit them
+tests/parsers/fixtures/*.pdf
 
 # IDE
 .vscode/
