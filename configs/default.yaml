@@ -1,0 +1,47 @@
+# Default pipeline configuration.
+# Override any key in your own config and pass it to Pipeline.from_config().
+# Pin model versions — silent upstream updates break benchmarks.
+
+parser:
+  backend: docling        # docling | pymupdf | minerU
+
+chunker:
+  strategy: recursive
+  chunk_size: 512
+  chunk_overlap: 64
+
+embedder:
+  model: BAAI/bge-small-en-v1.5   # fast dev model; swap to bge-m3 for eval
+  batch_size: 64
+
+indexer:
+  dense:
+    backend: lancedb
+    path: .verifiable_rag_index
+  sparse:
+    backend: bm25s
+  fusion: rrf
+  rrf_k: 60
+
+reranker:
+  backend: bge
+  model: BAAI/bge-reranker-v2-m3  # pinned — v3 has different calibration
+  top_k: 5
+
+generator:
+  backend: litellm
+  model: claude-sonnet-4-6         # update when new model releases
+  mode: prompted                   # prompted | constrained | post_hoc
+
+verifier:
+  backend: hhem
+  model: vectara/hallucination_evaluation_model  # pinned revision
+  batch_size: 16
+
+abstention:
+  strictness: balanced   # loose | balanced | strict | paranoid
+  thresholds:
+    loose: 0.0
+    balanced: 0.5
+    strict: 0.7
+    paranoid: 0.9

@@ -1,0 +1,31 @@
+site_name: verifiable-rag
+site_description: Document-grounded Q&A with sentence-level citations and faithfulness verification
+site_author: Rishi Gulati
+repo_url: https://github.com/rishisg2/verifiable-rag
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference:
+      - Pipeline: api/pipeline.md
+      - Models: api/models.md
+      - Parsers: api/parsers.md
+      - Chunkers: api/chunkers.md
+      - Generators: api/generators.md
+      - Verifiers: api/verifiers.md
+  - Benchmarks: benchmarks.md
+  - Roadmap: roadmap.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
