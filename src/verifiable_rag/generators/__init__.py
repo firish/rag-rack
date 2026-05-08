@@ -33,3 +33,9 @@ class Generator(Protocol):
     ) -> list[CitedSentence]:
         """Generate cited sentences for *query* given *chunks* from *documents*."""
         ...
+
+
+# Concrete implementations — imported after Protocol to avoid circular imports
+from verifiable_rag.generators.prompted import PromptedCitedGenerator  # noqa: E402
+
+__all__ = ["Generator", "GeneratorMode", "PromptedCitedGenerator"]

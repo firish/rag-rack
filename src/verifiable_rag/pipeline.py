@@ -22,7 +22,7 @@ from verifiable_rag.verifiers import Verifier
 
 # Thresholds below which we refuse regardless of strictness
 _STRICTNESS_THRESHOLDS: dict[str, float] = {
-    "loose": 0.0,      # never refuse on faithfulness
+    "loose": 0.0,  # never refuse on faithfulness
     "balanced": 0.5,
     "strict": 0.7,
     "paranoid": 0.9,
@@ -42,16 +42,14 @@ class Pipeline:
     chunker: Chunker
     embedder: Embedder
     indexer: HybridIndex
-    reranker: Reranker
     generator: Generator
-    verifier: Verifier
+    reranker: Reranker | None = None
+    verifier: Verifier | None = None
     strictness: Strictness = "balanced"
     top_k_retrieve: int = 20
     top_k_rerank: int = 5
 
-    _documents: dict[str, Document] = field(
-        default_factory=dict, init=False, repr=False
-    )
+    _documents: dict[str, Document] = field(default_factory=dict, init=False, repr=False)
 
     def ingest(self, path: str | Path) -> Document:
         """Parse, chunk, embed, and index a document.
@@ -70,16 +68,20 @@ class Pipeline:
         """Run the full pipeline for *query* and return a verified Answer."""
         query_embedding = self.embedder.embed_query(query)
         retrieved = self.indexer.search(query, query_embedding, k=self.top_k_retrieve)
-        reranked = self.reranker.rerank(query, retrieved, top_k=self.top_k_rerank)
+
+        if self.reranker is not None:
+            reranked = self.reranker.rerank(query, retrieved, top_k=self.top_k_rerank)
+        else:
+            reranked = retrieved[: self.top_k_rerank]
 
         doc_ids = {r.chunk.doc_id for r in reranked}
         documents = {did: self._documents[did] for did in doc_ids if did in self._documents}
 
         cited_sentences = self.generator.generate(query, reranked, documents)
 
-        # strict/paranoid modes always verify; loose mode skips
-        if self.strictness == "loose":
-            verification_results = []
+        # strict/paranoid modes always verify; loose mode (or missing verifier) skips
+        if self.strictness == "loose" or self.verifier is None:
+            verification_results: list[VerificationResult] = []
         else:
             verification_results = self.verifier.verify(cited_sentences, documents)
 
@@ -103,9 +105,7 @@ class Pipeline:
                 unsupported.append(vr.claim_text)
 
         avg_nli = sum(nli_scores) / len(nli_scores) if nli_scores else 1.0
-        avg_retrieval = (
-            sum(r.score for r in retrieved) / len(retrieved) if retrieved else 0.0
-        )
+        avg_retrieval = sum(r.score for r in retrieved) / len(retrieved) if retrieved else 0.0
 
         faithfulness_score = avg_nli if nli_scores else avg_retrieval
         was_refused = faithfulness_score < threshold and self.strictness != "loose"
