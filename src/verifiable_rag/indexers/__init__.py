@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from verifiable_rag.indexers.lance import LanceDBIndex
 from verifiable_rag.models.chunk import Chunk, RetrievedChunk
 
 
@@ -30,7 +31,7 @@ class SparseIndex(Protocol):
 
 
 @runtime_checkable
-class HybridIndex(Protocol):
+class HybridIndexProtocol(Protocol):
     """Combined dense + sparse index with RRF or weighted fusion."""
 
     def add(self, chunks: list[Chunk], embeddings: list[list[float]]) -> None:
@@ -43,3 +44,17 @@ class HybridIndex(Protocol):
         k: int,
     ) -> list[RetrievedChunk]:
         ...
+
+
+# Concrete implementations — imported after Protocols to avoid circular imports
+from verifiable_rag.indexers.hybrid import HybridIndex  # noqa: E402
+from verifiable_rag.indexers.sparse.bm25 import BM25Index  # noqa: E402
+
+__all__ = [
+    "DenseIndex",
+    "SparseIndex",
+    "HybridIndexProtocol",
+    "LanceDBIndex",
+    "BM25Index",
+    "HybridIndex",
+]

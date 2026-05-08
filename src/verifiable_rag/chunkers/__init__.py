@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from verifiable_rag.chunkers.parent_child import ParentChildChunker
+from verifiable_rag.chunkers.parent_expander import ParentExpander
 from verifiable_rag.models.chunk import Chunk
 from verifiable_rag.models.document import Document
 
@@ -18,3 +20,6 @@ class Chunker(Protocol):
     def chunk(self, document: Document) -> list[Chunk]:
         """Return chunks for all sentences in *document*."""
         ...
+
+
+__all__ = ["Chunk", "Chunker", "ParentChildChunker", "ParentExpander"]

@@ -94,6 +94,7 @@ module = [
     "cohere.*",
     "litellm.*",
     "transformers.*",
+    "voyageai.*",
     "ragas.*",
     "deepeval.*",
     "wtpsplit.*",
