@@ -1,22 +1,33 @@
-"""Span-level evaluation metrics.
+"""Sentence-level evaluation metrics.
 
-All metrics operate on (predicted, reference) pairs where references carry
-exact character-span ground truth. Implement metrics here before tuning any
-pipeline hyperparameter — eval before optimization.
+Tier 1 metrics — set-based (no char-span alignment yet):
+
+* ``citation_set_metrics`` — precision/recall/F1 of predicted vs. gold
+  sentence ID sets, per question.
+* ``abstention_metrics`` — precision/recall/F1 of refusal decisions across a
+  whole benchmark.
+* ``aggregate_citation_metrics`` — macro-average citation P/R/F1 over many
+  questions.
+
+These are the bare minimum needed to baseline the pipeline. Span tightness
+and per-claim attribution come in Tier 2.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from verifiable_rag.eval import EvalRecord
+
 
 @dataclass(frozen=True)
 class CitationMetrics:
-    """Span-level citation quality."""
+    """Citation quality for one or many questions."""
 
-    precision: float     # of cited spans, fraction that actually support the claim
-    recall: float        # of supporting spans, fraction that were cited
+    precision: float  # of predicted IDs, fraction in the gold set
+    recall: float  # of gold IDs, fraction in the predicted set
     f1: float
-    span_tightness: float  # 1.0 = exact, >1 = over-cited span
+    span_tightness: float = 0.0  # 0.0 = not measured (Tier 2)
 
 
 @dataclass(frozen=True)
@@ -24,43 +35,160 @@ class AbstentionMetrics:
     """Calibration of the abstention layer."""
 
     precision: float  # of refusals, fraction that were truly unsupported
-    recall: float     # of unsupported claims, fraction that were refused
+    recall: float  # of unsupported questions, fraction that were refused
     f1: float
 
 
-@dataclass(frozen=True)
-class EvalResult:
-    citation: CitationMetrics
-    abstention: AbstentionMetrics
-    localization_accuracy: float  # how closely cited spans match ground-truth spans
+# --------------------------------------------------------------------------- #
+# Per-question primitives
+# --------------------------------------------------------------------------- #
 
 
-def citation_precision_recall(
-    predicted_sentence_ids: list[list[str]],
-    reference_sentence_ids: list[list[str]],
+def citation_set_metrics(
+    predicted_ids: frozenset[str],
+    gold_ids: frozenset[str],
 ) -> CitationMetrics:
-    """Compute citation P/R/F1 over a set of (predicted, reference) pairs.
+    """Precision/recall/F1 over sets of sentence IDs for one question.
 
-    Both arguments are lists-of-lists: one inner list per generated sentence.
-    This is a stub — implement in Phase 2.
+    Edge cases:
+      * gold_ids empty → precision=1.0 if predicted_ids empty else 0.0; recall=1.0
+      * predicted_ids empty + gold_ids non-empty → precision=1.0 (vacuous), recall=0.0
     """
-    raise NotImplementedError("Implement in Phase 2 (eval harness)")
+    tp = len(predicted_ids & gold_ids)
+    precision = tp / len(predicted_ids) if predicted_ids else 1.0
+    recall = tp / len(gold_ids) if gold_ids else 1.0
+    f1 = _harmonic_mean(precision, recall)
+    return CitationMetrics(precision=precision, recall=recall, f1=f1)
 
 
-def abstention_f1(
+# --------------------------------------------------------------------------- #
+# Aggregate metrics
+# --------------------------------------------------------------------------- #
+
+
+def aggregate_citation_metrics(
+    pairs: list[tuple[frozenset[str], frozenset[str]]],
+) -> CitationMetrics:
+    """Macro-average citation precision/recall/F1 across many questions.
+
+    *pairs* is a list of (predicted_ids, gold_ids) tuples. Questions where
+    BOTH sets are empty are excluded from the average — they carry no signal.
+    """
+    scored = [
+        citation_set_metrics(pred, gold)
+        for pred, gold in pairs
+        if pred or gold  # skip vacuous (refused-and-should-refuse) cases
+    ]
+    if not scored:
+        return CitationMetrics(precision=1.0, recall=1.0, f1=1.0)
+
+    n = len(scored)
+    avg_p = sum(m.precision for m in scored) / n
+    avg_r = sum(m.recall for m in scored) / n
+    avg_f = sum(m.f1 for m in scored) / n
+    return CitationMetrics(precision=avg_p, recall=avg_r, f1=avg_f)
+
+
+def abstention_metrics(
     refused: list[bool],
-    truly_unsupported: list[bool],
+    should_refuse: list[bool],
 ) -> AbstentionMetrics:
-    """Compute abstention P/R/F1.  Stub — implement in Phase 2."""
-    raise NotImplementedError("Implement in Phase 2 (eval harness)")
+    """Precision/recall/F1 over refusal decisions.
 
-
-def span_tightness(
-    predicted_char_spans: list[tuple[int, int]],
-    reference_char_spans: list[tuple[int, int]],
-) -> float:
-    """Ratio of predicted span length to reference span length.
-
-    1.0 = perfect, >1 = over-cited.  Stub — implement in Phase 2.
+    Positive class = "refused". Treats *refused* and *should_refuse* as
+    aligned binary vectors of the same length.
     """
-    raise NotImplementedError("Implement in Phase 2 (eval harness)")
+    if len(refused) != len(should_refuse):
+        raise ValueError(f"length mismatch: {len(refused)} refused vs. {len(should_refuse)} gold")
+
+    tp = sum(1 for r, g in zip(refused, should_refuse, strict=True) if r and g)
+    fp = sum(1 for r, g in zip(refused, should_refuse, strict=True) if r and not g)
+    fn = sum(1 for r, g in zip(refused, should_refuse, strict=True) if not r and g)
+
+    precision = tp / (tp + fp) if (tp + fp) else 1.0
+    recall = tp / (tp + fn) if (tp + fn) else 1.0
+    f1 = _harmonic_mean(precision, recall)
+    return AbstentionMetrics(precision=precision, recall=recall, f1=f1)
+
+
+def localization_accuracy(
+    pairs: list[tuple[frozenset[str], frozenset[str]]],
+) -> float:
+    """Fraction of questions where the predicted set is exactly the gold set.
+
+    Strictest possible per-question metric. Useful as a sanity check but
+    expect it to be low for the prompted baseline.
+    """
+    if not pairs:
+        return 0.0
+    correct = sum(1 for pred, gold in pairs if pred == gold)
+    return correct / len(pairs)
+
+
+def coverage(
+    pairs: list[tuple[frozenset[str], frozenset[str]]],
+) -> float:
+    """Fraction of questions where at least one cited ID is in the gold set.
+
+    Looser than localization_accuracy — captures partial wins. Excludes
+    refused-and-should-refuse cases (both sets empty).
+    """
+    informative = [(p, g) for p, g in pairs if p or g]
+    if not informative:
+        return 1.0
+    hits = sum(1 for pred, gold in informative if pred & gold)
+    return hits / len(informative)
+
+
+# --------------------------------------------------------------------------- #
+# End-to-end report scoring
+# --------------------------------------------------------------------------- #
+
+
+def score_records(
+    records: list[EvalRecord],
+    gold_by_id: dict[str, tuple[frozenset[str], bool]],
+) -> dict[str, float]:
+    """Compute every Tier 1 metric over a benchmark run.
+
+    *gold_by_id* maps question_id -> (gold_sentence_ids, should_refuse).
+    Returns a flat dict of metric_name -> float, ready for markdown rendering.
+    """
+    pairs: list[tuple[frozenset[str], frozenset[str]]] = []
+    refused: list[bool] = []
+    should_refuse: list[bool] = []
+    errors = 0
+
+    for record in records:
+        if record.error is not None:
+            errors += 1
+            continue
+        gold_ids, gold_should_refuse = gold_by_id[record.question_id]
+        pairs.append((record.cited_sentence_ids, gold_ids))
+        refused.append(record.was_refused)
+        should_refuse.append(gold_should_refuse)
+
+    citation = aggregate_citation_metrics(pairs)
+    abstention = abstention_metrics(refused, should_refuse)
+
+    return {
+        "n_questions": float(len(records)),
+        "n_errors": float(errors),
+        "citation_precision": citation.precision,
+        "citation_recall": citation.recall,
+        "citation_f1": citation.f1,
+        "coverage": coverage(pairs),
+        "localization_accuracy": localization_accuracy(pairs),
+        "abstention_precision": abstention.precision,
+        "abstention_recall": abstention.recall,
+        "abstention_f1": abstention.f1,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
+
+
+def _harmonic_mean(a: float, b: float) -> float:
+    return 2 * a * b / (a + b) if (a + b) else 0.0

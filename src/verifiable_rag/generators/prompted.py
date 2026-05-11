@@ -25,8 +25,9 @@ LiteLLM gives us a single call shape for Anthropic, OpenAI, local models, etc.
 from __future__ import annotations
 
 import re
-from typing import Any, Literal
+from typing import Any
 
+from verifiable_rag.generators import GeneratorMode
 from verifiable_rag.models.answer import CitedSentence
 from verifiable_rag.models.chunk import RetrievedChunk
 from verifiable_rag.models.document import Document
@@ -91,7 +92,7 @@ class PromptedCitedGenerator:
         Override LiteLLM's default API base (e.g. for local models).
     """
 
-    mode: Literal["prompted"] = "prompted"
+    mode: GeneratorMode = "prompted"
 
     def __init__(
         self,
@@ -100,17 +101,21 @@ class PromptedCitedGenerator:
         max_tokens: int = 1024,
         system_prompt: str | None = None,
         api_base: str | None = None,
+        num_retries: int = 3,
     ) -> None:
         if not (0.0 <= temperature <= 2.0):
             raise ValueError(f"temperature must be in [0, 2], got {temperature}")
         if max_tokens < 1:
             raise ValueError(f"max_tokens must be positive, got {max_tokens}")
+        if num_retries < 0:
+            raise ValueError(f"num_retries must be >= 0, got {num_retries}")
 
         self._model = model
         self._temperature = temperature
         self._max_tokens = max_tokens
         self._system_prompt = system_prompt or _DEFAULT_SYSTEM_PROMPT
         self._api_base = api_base
+        self._num_retries = num_retries
 
     # ------------------------------------------------------------------ #
     # Generator Protocol
@@ -198,6 +203,9 @@ class PromptedCitedGenerator:
             ],
             "temperature": self._temperature,
             "max_tokens": self._max_tokens,
+            # LiteLLM honors provider Retry-After headers and uses exponential
+            # backoff on transient errors (rate limits, 5xx).
+            "num_retries": self._num_retries,
         }
         if self._api_base is not None:
             kwargs["api_base"] = self._api_base
