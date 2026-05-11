@@ -19,7 +19,7 @@ def test_satisfies_benchmark_protocol() -> None:
 def test_yields_questions() -> None:
     bench = HarryPotterMicroBench()
     qs = list(bench.questions())
-    assert len(qs) == 15
+    assert len(qs) == 29
     assert all(isinstance(q, EvalQuestion) for q in qs)
 
 

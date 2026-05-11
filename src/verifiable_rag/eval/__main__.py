@@ -35,11 +35,19 @@ _BENCHMARKS = {
 }
 
 
-def build_baseline_pipeline(model: str) -> Pipeline:
-    """The same baseline used in examples/ask_pdf.py — no reranker / verifier."""
+def build_baseline_pipeline(model: str, min_child_tokens: int = 150) -> Pipeline:
+    """The same baseline used in examples/ask_pdf.py — no reranker / verifier.
+
+    *min_child_tokens* is the chunker's lower bound. 150 (~120 words) gives
+    BGE-small enough semantic surface for stable embeddings on dialogue-heavy
+    text. Set to 0 to reproduce the v1 baseline.
+    """
     return Pipeline(
         parser=CachingParser(DoclingParser()),
-        chunker=ParentChildChunker(max_child_tokens=400),
+        chunker=ParentChildChunker(
+            max_child_tokens=400,
+            min_child_tokens=min_child_tokens,
+        ),
         embedder=SentenceTransformerEmbedder(model_name="BAAI/bge-small-en-v1.5"),
         indexer=HybridIndex(
             dense=LanceDBIndex(uri=Path(".verifiable_rag_cache/indexes/eval_lance")),
@@ -89,6 +97,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Set to 0 if you have a paid LLM tier."
         ),
     )
+    p.add_argument(
+        "--min-tokens",
+        type=int,
+        default=150,
+        help=(
+            "ParentChildChunker.min_child_tokens. Set to 0 to reproduce the "
+            "v1 baseline (no merging of small paragraphs)."
+        ),
+    )
     return p.parse_args(argv)
 
 
@@ -115,8 +132,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     benchmark = _BENCHMARKS[args.benchmark]()
-    pipeline = build_baseline_pipeline(args.model)
-    label = f"{args.model} | bge-small | hybrid(BM25+lance) | top_k=15 | loose"
+    pipeline = build_baseline_pipeline(args.model, min_child_tokens=args.min_tokens)
+    label = (
+        f"{args.model} | bge-small | hybrid(BM25+lance) | "
+        f"min_tokens={args.min_tokens} | top_k=15 | loose"
+    )
 
     report = run_benchmark(
         pipeline=pipeline,

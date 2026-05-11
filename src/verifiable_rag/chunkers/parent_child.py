@@ -1,22 +1,25 @@
 """ParentChildChunker: paragraph-level child chunks with section-pointer metadata.
 
-Given a parsed Document, produces one Chunk per paragraph (splitting at sentence
-boundaries when a paragraph exceeds ``max_child_tokens``).  Every chunk carries
-the sentence_ids of the sentences it contains, so retrieved chunks always map
-back to sentence-precise citations downstream — citation granularity is decoupled
-from chunk granularity (CLAUDE.md §6).
+Given a parsed Document, produces chunks that:
+  * carry every contained sentence_id (so downstream retrieval still produces
+    sentence-precise citations — citation granularity is decoupled from chunk
+    granularity, CLAUDE.md §6),
+  * fall within a token range bounded by ``[min_child_tokens, max_child_tokens]``
+    where possible.
 
 Parent context is NOT stored on chunks.  Each chunk carries
-``metadata["section_id"]`` and ``metadata["paragraph_id"]`` pointers; the
-generator calls ``ParentExpander`` to compute the LLM context at retrieval time.
-This avoids duplicating large section text into every child.
+``metadata["section_id"]`` (and the new ``paragraph_ids`` tuple) so the generator
+can call ``ParentExpander`` to compute the LLM context at retrieval time.
 
 Sizing
 ------
-- max_child_tokens (default 400): paragraphs above this are split greedily at
-  sentence boundaries.
-- A single sentence above the cap is emitted as its own oversize chunk;
-  sentences are atomic and never split.
+- ``max_child_tokens`` (default 400): ceiling. Paragraphs above this are split
+  greedily at sentence boundaries; an oversized single sentence is emitted alone.
+- ``min_child_tokens`` (default 0): floor. When > 0, consecutive small paragraphs
+  *within the same section* are merged until the chunk reaches the floor or
+  adding the next group would exceed the ceiling. ``0`` preserves the legacy
+  one-chunk-per-paragraph behavior.
+- Sections are hard boundaries — chunks never span sections.
 
 Token counting
 --------------
@@ -39,46 +42,71 @@ def _default_token_count(text: str) -> int:
     return max(1, len(text) // 4)
 
 
+# Internal: a (paragraph, sentences) pair representing one candidate chunk
+# slot before cross-paragraph merging.
+_GroupedSlot = tuple[Paragraph, tuple[Sentence, ...]]
+
+# A merged slot — may include sentences from multiple paragraphs.
+_MergedSlot = tuple[tuple[Paragraph, ...], tuple[Sentence, ...]]
+
+
 class ParentChildChunker:
     """Paragraph-level chunker that preserves sentence_ids and section pointers.
 
     Output chunks satisfy:
       - ``chunk.sentence_ids`` lists every Sentence inside the chunk in order.
       - ``chunk.span`` is the bounding span over those sentences (bboxes merged).
-      - ``chunk.metadata`` includes ``section_id``, ``paragraph_id``,
-        ``paragraph_part``, ``paragraph_part_count``, ``section_title``,
+      - ``chunk.metadata`` includes ``section_id``, ``section_title``,
+        ``paragraph_id`` (first paragraph touched, for backward compat),
+        ``paragraph_ids`` (tuple of all paragraph IDs touched),
+        ``paragraph_part``, ``paragraph_part_count``,
         ``page_first``, ``page_last``.
     """
 
     def __init__(
         self,
         max_child_tokens: int = 400,
+        min_child_tokens: int = 0,
         token_count: Callable[[str], int] = _default_token_count,
     ) -> None:
         if max_child_tokens <= 0:
             raise ValueError(f"max_child_tokens must be > 0, got {max_child_tokens}")
+        if min_child_tokens < 0:
+            raise ValueError(f"min_child_tokens must be >= 0, got {min_child_tokens}")
+        if min_child_tokens > max_child_tokens:
+            raise ValueError(
+                f"min_child_tokens ({min_child_tokens}) cannot exceed "
+                f"max_child_tokens ({max_child_tokens})"
+            )
         self._max = max_child_tokens
+        self._min = min_child_tokens
         self._tok = token_count
 
     def chunk(self, document: Document) -> list[Chunk]:
         chunks: list[Chunk] = []
         chunk_idx = 0
         for section in document.sections:
+            # 1) Existing per-paragraph grouping (splits oversized paragraphs).
+            section_groups: list[_GroupedSlot] = []
             for paragraph in section.paragraphs:
-                groups = self._group_sentences(paragraph)
-                for grp_idx, sents in enumerate(groups):
-                    chunks.append(
-                        self._build_chunk(
-                            chunk_idx=chunk_idx,
-                            section=section,
-                            paragraph=paragraph,
-                            sentences=sents,
-                            paragraph_part=grp_idx,
-                            paragraph_part_count=len(groups),
-                            document=document,
-                        )
+                for sents in self._group_sentences(paragraph):
+                    section_groups.append((paragraph, sents))
+
+            # 2) Cross-paragraph merging (no-op when min_child_tokens == 0).
+            merged = self._merge_under_floor(section_groups)
+
+            # 3) Build a chunk per merged slot.
+            for paragraphs, sentences in merged:
+                chunks.append(
+                    self._build_chunk(
+                        chunk_idx=chunk_idx,
+                        section=section,
+                        paragraphs=paragraphs,
+                        sentences=sentences,
+                        document=document,
                     )
-                    chunk_idx += 1
+                )
+                chunk_idx += 1
         return chunks
 
     # --------------------------------------------------------------------- #
@@ -113,15 +141,58 @@ class ParentChildChunker:
             groups.append(tuple(current))
         return groups
 
+    def _merge_under_floor(self, groups: list[_GroupedSlot]) -> list[_MergedSlot]:
+        """Merge consecutive groups within a section until the floor is met.
+
+        Algorithm:
+          * Walk groups left-to-right, accumulating into a pending buffer.
+          * Flush pending when adding the next group would exceed ``max``.
+          * Otherwise keep accumulating — the buffer naturally grows toward
+            the ceiling. When ``min == 0`` this is a no-op identity transform.
+          * Trailing pending is always flushed (even if under floor — better
+            than dropping data).
+        """
+        if self._min <= 0 or not groups:
+            return [((para,), sents) for para, sents in groups]
+
+        out: list[_MergedSlot] = []
+        pending_paragraphs: list[Paragraph] = []
+        pending_seen_para_ids: set[str] = set()
+        pending_sentences: list[Sentence] = []
+        pending_tokens = 0
+
+        def flush() -> None:
+            nonlocal pending_tokens
+            if pending_sentences:
+                out.append((tuple(pending_paragraphs), tuple(pending_sentences)))
+            pending_paragraphs.clear()
+            pending_seen_para_ids.clear()
+            pending_sentences.clear()
+            pending_tokens = 0
+
+        for paragraph, sents in groups:
+            sent_tokens = sum(self._tok(s.text) for s in sents)
+
+            # If adding this group would overflow the ceiling, flush first.
+            if pending_sentences and pending_tokens + sent_tokens > self._max:
+                flush()
+
+            if paragraph.id not in pending_seen_para_ids:
+                pending_paragraphs.append(paragraph)
+                pending_seen_para_ids.add(paragraph.id)
+            pending_sentences.extend(sents)
+            pending_tokens += sent_tokens
+
+        flush()
+        return out
+
     def _build_chunk(
         self,
         *,
         chunk_idx: int,
         section: Section,
-        paragraph: Paragraph,
+        paragraphs: tuple[Paragraph, ...],
         sentences: tuple[Sentence, ...],
-        paragraph_part: int,
-        paragraph_part_count: int,
         document: Document,
     ) -> Chunk:
         text = " ".join(s.text for s in sentences)
@@ -129,6 +200,25 @@ class ParentChildChunker:
         # are union-ed across all contained sentences via Span.merge.
         span = Span.merge([s.span for s in sentences])
         page_first, page_last = document.pages_for_span(span)
+
+        # paragraph_part / paragraph_part_count are only meaningful when this
+        # chunk is a strict subset of one paragraph.  Compute them only in
+        # that case; multi-paragraph chunks get the trivial (0, 1).
+        if len(paragraphs) == 1:
+            sole_paragraph = paragraphs[0]
+            full_groups = self._group_sentences(sole_paragraph)
+            paragraph_part_count = len(full_groups)
+            try:
+                paragraph_part = full_groups.index(sentences)
+            except ValueError:
+                # Sentences weren't a single original group (e.g. a merged
+                # subset that happened to fall under one paragraph). Treat
+                # as a single-part chunk.
+                paragraph_part = 0
+                paragraph_part_count = 1
+        else:
+            paragraph_part = 0
+            paragraph_part_count = 1
 
         return Chunk(
             chunk_id=f"{document.doc_id}::ch{chunk_idx}",
@@ -139,7 +229,8 @@ class ParentChildChunker:
             metadata={
                 "section_id": section.id,
                 "section_title": section.title,
-                "paragraph_id": paragraph.id,
+                "paragraph_id": paragraphs[0].id,
+                "paragraph_ids": tuple(p.id for p in paragraphs),
                 "paragraph_part": paragraph_part,
                 "paragraph_part_count": paragraph_part_count,
                 "page_first": page_first,

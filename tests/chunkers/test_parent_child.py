@@ -32,6 +32,18 @@ def test_invalid_max_child_tokens_raises() -> None:
         ParentChildChunker(max_child_tokens=0)
 
 
+@pytest.mark.smoke
+def test_invalid_min_child_tokens_raises() -> None:
+    with pytest.raises(ValueError, match="min_child_tokens"):
+        ParentChildChunker(min_child_tokens=-1)
+
+
+@pytest.mark.smoke
+def test_min_above_max_raises() -> None:
+    with pytest.raises(ValueError, match="cannot exceed"):
+        ParentChildChunker(max_child_tokens=100, min_child_tokens=200)
+
+
 # --------------------------------------------------------------------------- #
 # Common case: one paragraph → one chunk
 # --------------------------------------------------------------------------- #
@@ -202,3 +214,173 @@ def test_custom_token_counter_is_respected() -> None:
     # also exceeds, so each lands alone.
     assert len(chunks) == 4
     assert_chunk_invariants(doc, chunks)
+
+
+# --------------------------------------------------------------------------- #
+# min_child_tokens — cross-paragraph merging
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.smoke
+def test_min_zero_preserves_legacy_behavior() -> None:
+    """min=0 (default) must produce identical output to the original chunker."""
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A."], ["B."], ["C."]]),  # three single-sentence paras
+        ],
+    )
+    legacy = ParentChildChunker().chunk(doc)
+    explicit_zero = ParentChildChunker(min_child_tokens=0).chunk(doc)
+
+    assert len(legacy) == 3
+    assert len(explicit_zero) == 3
+    assert [c.sentence_ids for c in legacy] == [c.sentence_ids for c in explicit_zero]
+
+
+@pytest.mark.smoke
+def test_min_merges_consecutive_small_paragraphs() -> None:
+    """Single-sentence paragraphs below the floor get merged into one chunk."""
+    # Each "X." sentence is ~3 chars / 4 ≈ 1 token. Floor of 5 forces merging.
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A."], ["B."], ["C."], ["D."], ["E."], ["F."]]),
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=400,
+        min_child_tokens=5,
+        token_count=lambda t: max(1, len(t) // 4),
+    ).chunk(doc)
+
+    # All 6 single-sentence paragraphs should fold into one chunk
+    assert len(chunks) == 1
+    assert chunks[0].sentence_ids == tuple(f"doctest::s{i}" for i in range(6))
+    assert_chunk_invariants(doc, chunks)
+
+
+@pytest.mark.smoke
+def test_min_does_not_force_merging_when_each_paragraph_already_fills_max() -> None:
+    """When each paragraph already saturates max, no cross-paragraph merging."""
+    # Each sentence is forced to ~50 tokens; max=50, floor=20.
+    # Adding a second paragraph would overflow max → flush each alone.
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["Para A sentence."], ["Para B sentence."], ["Para C sentence."]]),
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=50,
+        min_child_tokens=20,
+        token_count=lambda _t: 50,
+    ).chunk(doc)
+
+    assert len(chunks) == 3
+
+
+@pytest.mark.smoke
+def test_min_does_not_merge_across_sections() -> None:
+    """Section boundaries are hard — even when both sections are tiny."""
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A."]]),  # 1 sentence in section 1
+            ("S2", [["B."]]),  # 1 sentence in section 2
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=400,
+        min_child_tokens=100,  # neither section meets the floor
+        token_count=lambda t: max(1, len(t) // 4),
+    ).chunk(doc)
+
+    # Two chunks (one per section), each under-floor — better than dropping.
+    assert len(chunks) == 2
+    assert chunks[0].metadata["section_id"] == "doctest::sec0"
+    assert chunks[1].metadata["section_id"] == "doctest::sec1"
+
+
+@pytest.mark.smoke
+def test_min_emits_trailing_under_floor_chunk() -> None:
+    """The last group may end up below the floor — we still emit it."""
+    # Floor=10 tokens, max=12. First two paragraphs combine to 10. Trailing
+    # third paragraph (5 tokens) gets emitted alone, under-floor.
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A B C D E."], ["F G H I J."], ["K L M."]]),
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=12,
+        min_child_tokens=10,
+        token_count=lambda t: max(1, len(t) // 2),  # ~10 tokens for 5-letter sentences
+    ).chunk(doc)
+
+    # Trailing single-paragraph chunk should still appear
+    assert len(chunks) >= 2
+    last_chunk_sentences = chunks[-1].sentence_ids
+    assert "doctest::s2" in last_chunk_sentences
+    assert_chunk_invariants(doc, chunks)
+
+
+@pytest.mark.smoke
+def test_min_merge_does_not_overflow_max() -> None:
+    """A merged chunk must still respect max_child_tokens."""
+    # 5 paragraphs × 1 sentence × 30 tokens each.  min=20, max=70.
+    # Greedy fill: para1 (30) below max-overflow with para2 (30) → 60 ≤ 70 → keep.
+    # Adding para3 (30) → 90 > 70 → flush 60. Start fresh with para3 (30).
+    # Para4 (30) → 60 ≤ 70 → keep.  Para5 (30) → 90 > 70 → flush 60. Start with para5.
+    # Trailing flush: para5 alone (30).
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A."], ["B."], ["C."], ["D."], ["E."]]),
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=70,
+        min_child_tokens=20,
+        token_count=lambda _t: 30,
+    ).chunk(doc)
+
+    # Every chunk's text-tokens must be <= max
+    for ch in chunks:
+        toks = sum(30 for _ in ch.sentence_ids)
+        assert toks <= 70, f"chunk {ch.chunk_id} is {toks} tokens, exceeds max=70"
+
+    assert_chunk_invariants(doc, chunks)
+
+
+@pytest.mark.smoke
+def test_metadata_paragraph_ids_includes_all_paragraphs() -> None:
+    """Multi-paragraph chunks expose all touched paragraph IDs."""
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["A."], ["B."], ["C."]]),  # three tiny paras
+        ],
+    )
+    chunks = ParentChildChunker(
+        max_child_tokens=400,
+        min_child_tokens=10,  # high enough to force merging
+        token_count=lambda t: max(1, len(t) // 4),
+    ).chunk(doc)
+
+    assert len(chunks) == 1
+    md = chunks[0].metadata
+    # Backwards-compat: paragraph_id is the first paragraph touched
+    assert md["paragraph_id"] == "doctest::para0"
+    # New: paragraph_ids enumerates all of them in order
+    assert md["paragraph_ids"] == ("doctest::para0", "doctest::para1", "doctest::para2")
+    # Multi-paragraph chunks get trivial part numbering
+    assert md["paragraph_part"] == 0
+    assert md["paragraph_part_count"] == 1
+
+
+@pytest.mark.smoke
+def test_metadata_paragraph_ids_single_for_unmerged_chunks() -> None:
+    """When a chunk maps to one paragraph, paragraph_ids has a single entry."""
+    doc = build_document(
+        sections_spec=[
+            ("S1", [["This is a sentence.", "Another one here."]]),
+        ],
+    )
+    chunks = ParentChildChunker().chunk(doc)
+    assert len(chunks) == 1
+    assert chunks[0].metadata["paragraph_ids"] == ("doctest::para0",)
