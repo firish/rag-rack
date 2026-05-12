@@ -29,18 +29,29 @@ from verifiable_rag.generators import PromptedCitedGenerator
 from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
 from verifiable_rag.parsers import CachingParser, DoclingParser
 from verifiable_rag.pipeline import Pipeline
+from verifiable_rag.rerankers import BGERerankerV2
 
 _BENCHMARKS = {
     "harry_potter_micro": HarryPotterMicroBench,
 }
 
 
-def build_baseline_pipeline(model: str, min_child_tokens: int = 150) -> Pipeline:
-    """The same baseline used in examples/ask_pdf.py — no reranker / verifier.
+def build_baseline_pipeline(
+    model: str,
+    min_child_tokens: int = 100,
+    use_reranker: bool = True,
+    top_k_retrieve: int = 80,
+    top_k_rerank: int = 8,
+) -> Pipeline:
+    """The same baseline used in examples/ask_pdf.py — no verifier yet.
 
-    *min_child_tokens* is the chunker's lower bound. 150 (~120 words) gives
+    *min_child_tokens* is the chunker's lower bound. 100 (~75 words) gives
     BGE-small enough semantic surface for stable embeddings on dialogue-heavy
-    text. Set to 0 to reproduce the v1 baseline.
+    text without over-merging. Set to 0 to reproduce the v1 baseline.
+
+    With *use_reranker* (default True), top-K candidates from the hybrid
+    retriever go through a cross-encoder reranker before reaching the LLM.
+    Defaults: retrieve 80 candidates, rerank to 8 for the LLM.
     """
     return Pipeline(
         parser=CachingParser(DoclingParser()),
@@ -53,10 +64,11 @@ def build_baseline_pipeline(model: str, min_child_tokens: int = 150) -> Pipeline
             dense=LanceDBIndex(uri=Path(".verifiable_rag_cache/indexes/eval_lance")),
             sparse=BM25Index(),
         ),
+        reranker=BGERerankerV2() if use_reranker else None,
         generator=PromptedCitedGenerator(model=model),
         strictness="loose",
-        top_k_retrieve=40,
-        top_k_rerank=15,
+        top_k_retrieve=top_k_retrieve,
+        top_k_rerank=top_k_rerank,
     )
 
 
@@ -100,11 +112,28 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--min-tokens",
         type=int,
-        default=150,
+        default=100,
         help=(
             "ParentChildChunker.min_child_tokens. Set to 0 to reproduce the "
             "v1 baseline (no merging of small paragraphs)."
         ),
+    )
+    p.add_argument(
+        "--no-reranker",
+        action="store_true",
+        help="Disable the BGE cross-encoder reranker (for ablation).",
+    )
+    p.add_argument(
+        "--top-k-retrieve",
+        type=int,
+        default=80,
+        help="Candidates pulled from the hybrid index before reranking.",
+    )
+    p.add_argument(
+        "--top-k-rerank",
+        type=int,
+        default=8,
+        help="Chunks sent to the LLM after reranking.",
     )
     return p.parse_args(argv)
 
@@ -132,10 +161,18 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     benchmark = _BENCHMARKS[args.benchmark]()
-    pipeline = build_baseline_pipeline(args.model, min_child_tokens=args.min_tokens)
+    pipeline = build_baseline_pipeline(
+        args.model,
+        min_child_tokens=args.min_tokens,
+        use_reranker=not args.no_reranker,
+        top_k_retrieve=args.top_k_retrieve,
+        top_k_rerank=args.top_k_rerank,
+    )
+    rerank_label = "bge-rerank-v2-m3" if not args.no_reranker else "no-reranker"
     label = (
         f"{args.model} | bge-small | hybrid(BM25+lance) | "
-        f"min_tokens={args.min_tokens} | top_k=15 | loose"
+        f"min_tokens={args.min_tokens} | {rerank_label} | "
+        f"retrieve={args.top_k_retrieve}/rerank={args.top_k_rerank} | loose"
     )
 
     report = run_benchmark(
