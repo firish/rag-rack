@@ -229,8 +229,13 @@ def test_ask_passes_retrieved_chunks_to_generator(tmp_path: Path) -> None:
 
 
 @pytest.mark.smoke
-def test_ask_with_loose_strictness_skips_verification(tmp_path: Path) -> None:
-    """Loose mode must not call the verifier even if one is supplied."""
+def test_loose_strictness_runs_verifier_but_does_not_refuse(tmp_path: Path) -> None:
+    """Loose mode runs the verifier (for scoring/analysis) but never refuses.
+
+    Pipeline calls the verifier whenever one is configured — strictness only
+    controls whether a low NLI score triggers refusal. Loose mode = instrument
+    but don't act.
+    """
 
     class _SpyVerifier(_AlwaysFailVerifier):
         def __init__(self) -> None:
@@ -248,8 +253,12 @@ def test_ask_with_loose_strictness_skips_verification(tmp_path: Path) -> None:
     pipe.ingest("/dev/null")
     answer = pipe.ask("q?")
 
-    assert spy.calls == 0
+    # Verifier was called — we want the score in the report
+    assert spy.calls == 1
+    # But loose mode never refuses on faithfulness, even when the verifier fails
     assert not answer.was_refused
+    # And we get the verification_results in the Answer for inspection
+    assert len(answer.verification_results) == 1
 
 
 # --------------------------------------------------------------------------- #

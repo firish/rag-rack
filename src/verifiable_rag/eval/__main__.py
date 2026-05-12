@@ -27,9 +27,11 @@ from verifiable_rag.eval.reporter import write_markdown
 from verifiable_rag.eval.runners import run_benchmark
 from verifiable_rag.generators import PromptedCitedGenerator
 from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
+from verifiable_rag.models.answer import Strictness
 from verifiable_rag.parsers import CachingParser, DoclingParser
 from verifiable_rag.pipeline import Pipeline
 from verifiable_rag.rerankers import BGERerankerV2
+from verifiable_rag.verifiers import HHEMVerifier
 
 _BENCHMARKS = {
     "harry_potter_micro": HarryPotterMicroBench,
@@ -40,10 +42,12 @@ def build_baseline_pipeline(
     model: str,
     min_child_tokens: int = 100,
     use_reranker: bool = True,
+    verifier_name: str = "none",
+    strictness: Strictness = "loose",
     top_k_retrieve: int = 80,
     top_k_rerank: int = 8,
 ) -> Pipeline:
-    """The same baseline used in examples/ask_pdf.py — no verifier yet.
+    """Wire the eval pipeline.
 
     *min_child_tokens* is the chunker's lower bound. 100 (~75 words) gives
     BGE-small enough semantic surface for stable embeddings on dialogue-heavy
@@ -52,7 +56,14 @@ def build_baseline_pipeline(
     With *use_reranker* (default True), top-K candidates from the hybrid
     retriever go through a cross-encoder reranker before reaching the LLM.
     Defaults: retrieve 80 candidates, rerank to 8 for the LLM.
+
+    With *verifier_name="hhem"*, each generated cited sentence is checked
+    by HHEM-2.1-open against the cited source span via NLI. The Pipeline
+    *strictness* threshold governs whether low-faithfulness sentences get
+    refused (loose=never, balanced=0.5, strict=0.7, paranoid=0.9).
     """
+    verifier = HHEMVerifier() if verifier_name == "hhem" else None
+
     return Pipeline(
         parser=CachingParser(DoclingParser()),
         chunker=ParentChildChunker(
@@ -65,8 +76,9 @@ def build_baseline_pipeline(
             sparse=BM25Index(),
         ),
         reranker=BGERerankerV2() if use_reranker else None,
+        verifier=verifier,
         generator=PromptedCitedGenerator(model=model),
-        strictness="loose",
+        strictness=strictness,
         top_k_retrieve=top_k_retrieve,
         top_k_rerank=top_k_rerank,
     )
@@ -135,6 +147,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=8,
         help="Chunks sent to the LLM after reranking.",
     )
+    p.add_argument(
+        "--verifier",
+        choices=("none", "hhem"),
+        default="none",
+        help="NLI verifier to use. 'hhem' uses Vectara HHEM-2.1-open.",
+    )
+    p.add_argument(
+        "--strictness",
+        choices=("loose", "balanced", "strict", "paranoid"),
+        default="loose",
+        help=(
+            "Refusal threshold mode. loose=never refuse on faithfulness, "
+            "balanced=0.5, strict=0.7, paranoid=0.9. The verifier always "
+            "runs if enabled; this only controls refusal."
+        ),
+    )
     return p.parse_args(argv)
 
 
@@ -165,14 +193,18 @@ def main(argv: list[str] | None = None) -> int:
         args.model,
         min_child_tokens=args.min_tokens,
         use_reranker=not args.no_reranker,
+        verifier_name=args.verifier,
+        strictness=args.strictness,
         top_k_retrieve=args.top_k_retrieve,
         top_k_rerank=args.top_k_rerank,
     )
     rerank_label = "bge-rerank-v2-m3" if not args.no_reranker else "no-reranker"
+    verifier_label = "hhem-2.1-open" if args.verifier == "hhem" else "no-verifier"
     label = (
         f"{args.model} | bge-small | hybrid(BM25+lance) | "
         f"min_tokens={args.min_tokens} | {rerank_label} | "
-        f"retrieve={args.top_k_retrieve}/rerank={args.top_k_rerank} | loose"
+        f"retrieve={args.top_k_retrieve}/rerank={args.top_k_rerank} | "
+        f"{verifier_label} | {args.strictness}"
     )
 
     report = run_benchmark(

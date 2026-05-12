@@ -79,8 +79,10 @@ class Pipeline:
 
         cited_sentences = self.generator.generate(query, reranked, documents)
 
-        # strict/paranoid modes always verify; loose mode (or missing verifier) skips
-        if self.strictness == "loose" or self.verifier is None:
+        # Run the verifier whenever one is configured — strictness only controls
+        # whether we REFUSE on a low score, not whether we score at all. This
+        # lets loose mode emit NLI scores for analysis without filtering.
+        if self.verifier is None:
             verification_results: list[VerificationResult] = []
         else:
             verification_results = self.verifier.verify(cited_sentences, documents)

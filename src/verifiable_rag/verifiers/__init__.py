@@ -25,3 +25,9 @@ class Verifier(Protocol):
     ) -> list[VerificationResult]:
         """Return one VerificationResult per CitedSentence, in the same order."""
         ...
+
+
+# Concrete implementations — imported after Protocol to avoid circular imports
+from verifiable_rag.verifiers.hhem import HHEMVerifier  # noqa: E402
+
+__all__ = ["Verifier", "HHEMVerifier"]
