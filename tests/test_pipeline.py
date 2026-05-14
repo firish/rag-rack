@@ -20,7 +20,6 @@ from verifiable_rag.models.answer import (
 )
 from verifiable_rag.models.chunk import RetrievedChunk
 from verifiable_rag.models.document import Document
-from verifiable_rag.models.span import Span
 from verifiable_rag.pipeline import Pipeline
 
 lancedb = pytest.importorskip("lancedb", reason="lancedb not installed")
@@ -283,6 +282,42 @@ def test_ask_with_supporting_verifier_keeps_sentences(tmp_path: Path) -> None:
     assert not answer.was_refused
     assert answer.faithfulness_components.nli_score == pytest.approx(1.0)
     assert answer.unsupported_claims == []
+
+
+@pytest.mark.smoke
+def test_surgical_correction_keeps_supported_drops_unsupported(tmp_path: Path) -> None:
+    """Per-sentence filtering: supported sentences survive, unsupported get cut."""
+
+    class _MixedVerifier:
+        """Marks even-indexed sentences supported, odd-indexed unsupported."""
+
+        def verify(self, sentences, documents):  # type: ignore[no-untyped-def]
+            return [
+                VerificationResult(
+                    cited_sentence_index=i,
+                    claim_text=s.text,
+                    is_supported=(i % 2 == 0),
+                    nli_score=0.9 if i % 2 == 0 else 0.1,
+                )
+                for i, s in enumerate(sentences)
+            ]
+
+    gen = _FakeGenerator(
+        [
+            CitedSentence(text="Good 0.", supporting_sentence_ids=("bio::s0",), confidence=1.0),
+            CitedSentence(text="Bad 1.", supporting_sentence_ids=("bio::s0",), confidence=1.0),
+            CitedSentence(text="Good 2.", supporting_sentence_ids=("bio::s0",), confidence=1.0),
+        ]
+    )
+    pipe = _build_pipeline(tmp_path, gen, strictness="balanced", verifier=_MixedVerifier())
+    pipe.ingest("/dev/null")
+    answer = pipe.ask("q?")
+
+    # Only the two supported sentences survive — NOT a refusal (partial answer)
+    assert not answer.was_refused
+    assert [s.text for s in answer.sentences] == ["Good 0.", "Good 2."]
+    # The dropped one shows up in unsupported_claims for auditability
+    assert "Bad 1." in answer.unsupported_claims
 
 
 @pytest.mark.smoke

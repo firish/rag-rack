@@ -52,8 +52,10 @@ _REFUSAL_PATTERNS = (
 
 _DEFAULT_SYSTEM_PROMPT = (
     "You are a careful research assistant. You answer questions strictly from "
-    "the provided source sentences. You cite every claim with the sentence "
-    "ID(s) it comes from. If the sources do not support a claim, do not make "
+    "the provided source sentences. Stay close to the source wording — prefer "
+    "phrasing that mirrors the cited sentence rather than paraphrasing or "
+    "synthesizing. Cite every claim with the single most directly supporting "
+    "source sentence ID. If the sources do not support a claim, do not make "
     "the claim. If you cannot answer at all from the sources, say so."
 )
 
@@ -64,11 +66,18 @@ Sources (each line is one source sentence prefixed by its citation ID):
 {sources}
 
 Instructions:
-1. Write the answer as one or more discrete sentences.
-2. After EACH sentence, cite the supporting source IDs in brackets, e.g.:
-   "Mitochondria produce ATP. [doc1::s5, doc1::s7]"
-3. Use ONLY the source IDs shown above. Do not invent IDs.
-4. If the sources do not answer the question, reply exactly:
+1. Write the answer as discrete sentences.
+2. After EACH sentence, cite the source ID that DIRECTLY supports it, e.g.:
+   "Mitochondria produce ATP. [doc1::s5]"
+3. **Cite the SINGLE most directly supporting source per claim.** Only list
+   multiple IDs when the claim genuinely combines facts from each. Avoid
+   "decoration" citations to merely-related sentences.
+4. **Stay close to the source wording.** Prefer phrasing that closely
+   mirrors the cited sentence. Avoid paraphrase or rephrasing that changes
+   the words substantially. Do NOT synthesize facts the sources do not
+   explicitly state.
+5. Use ONLY the source IDs shown above. Do not invent IDs.
+6. If the sources do not answer the question, reply exactly:
    "I cannot answer this from the provided sources."
 
 Answer:"""

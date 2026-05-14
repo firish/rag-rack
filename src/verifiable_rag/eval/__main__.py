@@ -43,6 +43,7 @@ def build_baseline_pipeline(
     min_child_tokens: int = 100,
     use_reranker: bool = True,
     verifier_name: str = "none",
+    verifier_threshold: float = 0.3,
     strictness: Strictness = "loose",
     top_k_retrieve: int = 80,
     top_k_rerank: int = 8,
@@ -62,7 +63,7 @@ def build_baseline_pipeline(
     *strictness* threshold governs whether low-faithfulness sentences get
     refused (loose=never, balanced=0.5, strict=0.7, paranoid=0.9).
     """
-    verifier = HHEMVerifier() if verifier_name == "hhem" else None
+    verifier = HHEMVerifier(threshold=verifier_threshold) if verifier_name == "hhem" else None
 
     return Pipeline(
         parser=CachingParser(DoclingParser()),
@@ -163,6 +164,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "runs if enabled; this only controls refusal."
         ),
     )
+    p.add_argument(
+        "--verifier-threshold",
+        type=float,
+        default=0.3,
+        help=(
+            "Cutoff for the per-sentence is_supported flag (used by surgical "
+            "correction in non-loose strictness). HHEM-2.1-open default is "
+            "0.3 — empirically loose enough to allow paraphrased citations."
+        ),
+    )
     return p.parse_args(argv)
 
 
@@ -194,12 +205,15 @@ def main(argv: list[str] | None = None) -> int:
         min_child_tokens=args.min_tokens,
         use_reranker=not args.no_reranker,
         verifier_name=args.verifier,
+        verifier_threshold=args.verifier_threshold,
         strictness=args.strictness,
         top_k_retrieve=args.top_k_retrieve,
         top_k_rerank=args.top_k_rerank,
     )
     rerank_label = "bge-rerank-v2-m3" if not args.no_reranker else "no-reranker"
-    verifier_label = "hhem-2.1-open" if args.verifier == "hhem" else "no-verifier"
+    verifier_label = (
+        f"hhem-2.1-open@{args.verifier_threshold}" if args.verifier == "hhem" else "no-verifier"
+    )
     label = (
         f"{args.model} | bge-small | hybrid(BM25+lance) | "
         f"min_tokens={args.min_tokens} | {rerank_label} | "

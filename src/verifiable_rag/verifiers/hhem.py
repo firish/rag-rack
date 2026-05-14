@@ -41,8 +41,12 @@ class HHEMVerifier:
         ``"vectara/hallucination_evaluation_model"`` (HHEM-2.1-open, ~600M).
     threshold:
         Cutoff for the boolean ``is_supported`` flag on each
-        VerificationResult. Pipeline strictness controls a separate
-        refusal threshold; this one is just per-claim. Default 0.5.
+        VerificationResult.  Pipeline surgical correction uses this flag to
+        decide which sentences to keep.  Default ``0.3`` — empirically
+        chosen because HHEM was trained on tight summarization-style
+        entailment, but our LLM produces paraphrased / synthesized cited
+        sentences that legitimately score in the 0.3-0.6 range.  Raise this
+        toward 0.5+ for stricter behavior; lower it for more permissive.
     device:
         ``"cpu"``, ``"cuda"``, ``"mps"``, or ``None`` to autodetect.
     """
@@ -50,7 +54,7 @@ class HHEMVerifier:
     def __init__(
         self,
         model_name: str = "vectara/hallucination_evaluation_model",
-        threshold: float = 0.5,
+        threshold: float = 0.3,
         device: str | None = None,
     ) -> None:
         if not (0.0 <= threshold <= 1.0):

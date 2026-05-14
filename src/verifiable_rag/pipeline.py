@@ -96,25 +96,73 @@ class Pipeline:
         verification_results: list[VerificationResult],
         retrieved: list[RetrievedChunk],
     ) -> Answer:
+        """Build the final Answer, applying surgical correction when a verifier ran.
+
+        Filtering strategy:
+        * No verifier results (or loose strictness): every generated CitedSentence
+          surfaces. ``was_refused`` reflects only the hard retrieval-score path
+          (used when there's no NLI signal to act on).
+        * Verifier ran AND strictness != loose: **surgical correction**.  Drop
+          individual sentences whose ``VerificationResult.is_supported`` is
+          False; keep the rest.  If every sentence is dropped, that counts as
+          a refusal.  This is strictly more useful than hard refusal — one
+          weakly-supported sentence no longer kills a 4-sentence answer.
+
+        Strictness still controls the *threshold* the verifier uses (via its
+        own ``is_supported`` flag, which we trust); strictness in Pipeline
+        decides whether we ACT on those flags at all.
+        """
         threshold = _STRICTNESS_THRESHOLDS[self.strictness]
 
         unsupported: list[str] = []
         nli_scores: list[float] = []
+        is_supported_by_idx: dict[int, bool] = {}
 
         for vr in verification_results:
             nli_scores.append(vr.nli_score)
+            is_supported_by_idx[vr.cited_sentence_index] = vr.is_supported
             if not vr.is_supported:
                 unsupported.append(vr.claim_text)
 
         avg_nli = sum(nli_scores) / len(nli_scores) if nli_scores else 1.0
         avg_retrieval = sum(r.score for r in retrieved) / len(retrieved) if retrieved else 0.0
-
         faithfulness_score = avg_nli if nli_scores else avg_retrieval
-        was_refused = faithfulness_score < threshold and self.strictness != "loose"
+
+        # ----- Surgical correction vs hard refusal -----
+        if verification_results and self.strictness != "loose":
+            # Per-sentence filtering using the verifier's is_supported flag.
+            # Sentences without a matching VerificationResult are kept by
+            # default (shouldn't happen in practice — Verifier returns one
+            # result per input).
+            kept = [
+                cs
+                for i, cs in enumerate(cited_sentences)
+                if is_supported_by_idx.get(i, True)
+            ]
+            # An answer that *had* content but lost it all to filtering is a
+            # refusal; an answer that started empty is not.
+            was_refused = bool(cited_sentences) and not kept
+            final_sentences = kept
+            refusal_reason = (
+                f"surgical correction filtered all {len(cited_sentences)} "
+                f"sentences (strictness={self.strictness})"
+                if was_refused
+                else None
+            )
+        else:
+            # No verifier — fall back to retrieval-score threshold for refusal.
+            was_refused = faithfulness_score < threshold and self.strictness != "loose"
+            final_sentences = cited_sentences if not was_refused else []
+            refusal_reason = (
+                f"faithfulness_score {faithfulness_score:.2f} below "
+                f"{self.strictness} threshold {threshold}"
+                if was_refused
+                else None
+            )
 
         return Answer(
             query=query,
-            sentences=cited_sentences if not was_refused else [],
+            sentences=final_sentences,
             faithfulness_score=faithfulness_score,
             faithfulness_components=FaithfulnessComponents(
                 retrieval_score=avg_retrieval,
@@ -125,10 +173,5 @@ class Pipeline:
             verification_results=verification_results,
             strictness=self.strictness,
             was_refused=was_refused,
-            refusal_reason=(
-                f"faithfulness_score {faithfulness_score:.2f} below "
-                f"{self.strictness} threshold {threshold}"
-                if was_refused
-                else None
-            ),
+            refusal_reason=refusal_reason,
         )
