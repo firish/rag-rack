@@ -136,6 +136,27 @@ class LitQA2Bench:
             ideal = str(row["ideal"]).strip()
             should_refuse = self._is_refusal_answer(ideal)
 
+            distractors_raw = row["distractors"]
+            distractors_clean = (
+                [str(d).strip() for d in distractors_raw]
+                if distractors_raw is not None
+                else []
+            )
+            # Embed MC options in the question text so the LLM can select the
+            # best-matching option rather than trying to produce a verbatim
+            # match (which causes over-refusal on near-matches like 12,309 vs
+            # 12,300). This mirrors PaperQA2's approach for LitQA2.
+            # Sort alphabetically for a deterministic, position-bias-free order.
+            options = sorted(
+                distractors_clean + [ideal, "Insufficient information to answer"],
+                key=str.lower,
+            )
+            options_block = "\n".join(f"  - {opt}" for opt in options)
+            formatted_question = (
+                f"{str(row['question']).strip()}\n\n"
+                f"Select the best answer from these options:\n{options_block}"
+            )
+
             # If the index has key_passage_sentence_ids for this question
             # (computed by scripts/fetch_litqa2.py via rapidfuzz alignment),
             # surface them as gold. Otherwise we fall back to empty —
@@ -143,7 +164,7 @@ class LitQA2Bench:
             kp_ids = entry.get("key_passage_sentence_ids") or []
             yield EvalQuestion(
                 id=qid,
-                question=str(row["question"]),
+                question=formatted_question,
                 document_paths=(Path(str(pdf_path)),) if pdf_path else (),
                 gold_sentence_ids=frozenset(str(s) for s in kp_ids)
                 if not should_refuse

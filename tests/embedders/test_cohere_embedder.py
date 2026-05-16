@@ -74,7 +74,7 @@ def test_batching_splits_large_inputs(fake_cohere: MagicMock) -> None:
 
 
 @pytest.mark.smoke
-def test_missing_api_key_raises_at_use(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_missing_api_key_raises_at_use(fake_cohere: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("COHERE_API_KEY", raising=False)
     e = CohereEmbedder(api_key=None)
     with pytest.raises(RuntimeError, match="COHERE_API_KEY"):

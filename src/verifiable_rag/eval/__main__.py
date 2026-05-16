@@ -15,9 +15,15 @@ reranker, no verifier, loose strictness) so the numbers are comparable.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
+
+# LiteLLM expects ANTHROPIC_API_KEY; many local .env files use CLAUDE_API_KEY.
+# Fall back transparently so `python -m verifiable_rag.eval` works with either.
+if "ANTHROPIC_API_KEY" not in os.environ and "CLAUDE_API_KEY" in os.environ:
+    os.environ["ANTHROPIC_API_KEY"] = os.environ["CLAUDE_API_KEY"]
 
 from verifiable_rag.chunkers import ParentChildChunker
 from verifiable_rag.embedders import CohereEmbedder, SentenceTransformerEmbedder

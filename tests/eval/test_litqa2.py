@@ -337,6 +337,24 @@ def test_bench_max_questions_caps(fake_hf_dataset: Path, index_with_two_pdfs: Pa
 
 
 @pytest.mark.smoke
+def test_bench_question_embeds_mc_options(fake_hf_dataset: Path, index_with_two_pdfs: Path) -> None:
+    """q.question must include all options so the LLM can select from them."""
+    from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench
+
+    bench = LitQA2Bench(index_path=index_with_two_pdfs)
+    by_id = {q.id: q for q in bench.questions()}
+    q1 = by_id["q1"]
+    # Original question text still present
+    assert "antibiotic" in q1.question
+    # All MC options embedded
+    assert "ciprofloxacin" in q1.question  # ideal
+    assert "meropenem" in q1.question  # distractor
+    assert "Insufficient information to answer" in q1.question
+    # Formatted as a choice block
+    assert "Select the best answer" in q1.question
+
+
+@pytest.mark.smoke
 def test_bench_raises_when_index_missing(tmp_path: Path) -> None:
     from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench
 

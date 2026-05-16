@@ -41,6 +41,9 @@ _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 
 # Heuristic refusal patterns the model may emit.  Kept short and exact to
 # avoid stripping legitimate hedged answers.
+# "insufficient information to answer" is the LitQA2 multi-choice option
+# that semantically means "refusal" — we treat it as such so abstention
+# metrics aren't muddied by a meaningless attached citation.
 _REFUSAL_PATTERNS = (
     "i cannot answer",
     "i can't answer",
@@ -48,15 +51,17 @@ _REFUSAL_PATTERNS = (
     "i don't have enough information",
     "the sources do not contain",
     "the provided sources do not",
+    "insufficient information to answer",
 )
 
 _DEFAULT_SYSTEM_PROMPT = (
     "You are a careful research assistant. You answer questions strictly from "
-    "the provided source sentences. Stay close to the source wording — prefer "
-    "phrasing that mirrors the cited sentence rather than paraphrasing or "
-    "synthesizing. Cite every claim with the single most directly supporting "
-    "source sentence ID. If the sources do not support a claim, do not make "
-    "the claim. If you cannot answer at all from the sources, say so."
+    "the provided source sentences. When answer options are given, select the "
+    "option best supported by the sources — you do not need a verbatim match; "
+    "scientific inference and numeric approximation are acceptable. "
+    "Cite every claim with the single most directly supporting source sentence ID. "
+    "If the sources do not support a claim, do not make the claim. "
+    "Only say you cannot answer if the sources contain NO relevant information."
 )
 
 _USER_PROMPT_TEMPLATE = """\
@@ -72,13 +77,16 @@ Instructions:
 3. **Cite the SINGLE most directly supporting source per claim.** Only list
    multiple IDs when the claim genuinely combines facts from each. Avoid
    "decoration" citations to merely-related sentences.
-4. **Stay close to the source wording.** Prefer phrasing that closely
-   mirrors the cited sentence. Avoid paraphrase or rephrasing that changes
-   the words substantially. Do NOT synthesize facts the sources do not
-   explicitly state.
+4. **If the question lists answer options**, select the option most
+   consistent with the sources. Numeric approximation and categorical
+   inference are acceptable — you do not need a verbatim source match.
 5. Use ONLY the source IDs shown above. Do not invent IDs.
-6. If the sources do not answer the question, reply exactly:
-   "I cannot answer this from the provided sources."
+6. ONLY when the sources contain NO relevant information at all, reply
+   "I cannot answer this from the provided sources." (or, if the question
+   offers an "Insufficient information to answer" option, select that
+   option). In both cases no citation is needed — there is nothing to cite.
+   If the sources provide partial or indirect evidence, use that evidence
+   to select the best option.
 
 Answer:"""
 
