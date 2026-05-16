@@ -6,6 +6,8 @@ cleanly if bm25s is not installed.
 """
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from tests.chunkers.conftest import build_document
@@ -73,6 +75,31 @@ def test_add_appends_on_second_call() -> None:
     idx.add(_make_chunks(3))
     idx.add(_make_chunks(2, doc_id="doc2"))
     assert idx.count == 5
+
+
+@pytest.mark.smoke
+def test_add_defers_rebuild_until_search() -> None:
+    """Lazy rebuild: many add() calls don't trigger N tokenisations.
+
+    Counts how often the bm25s tokenizer is invoked across 10 add() calls
+    + 1 search() — should be exactly one tokenize call (at search time),
+    not 10. This is the O(N²) → O(N) fix.
+    """
+    import bm25s as _bm25s
+
+    calls: list[int] = []
+
+    def counting_tokenize(texts: list[str]) -> Any:  # noqa: ANN401
+        calls.append(len(texts))
+        return _bm25s.tokenize(texts)
+
+    idx = BM25Index(tokenize=counting_tokenize)
+    for i in range(10):
+        idx.add(_make_chunks(2, doc_id=f"doc{i}"))
+    assert calls == []  # nothing tokenised yet
+    idx.search("content", k=3)
+    # One corpus tokenise (20 texts) + one query tokenise (1 text)
+    assert calls == [20, 1]
 
 
 # --------------------------------------------------------------------------- #
@@ -219,8 +246,7 @@ def test_clear_removes_all_data() -> None:
 
 
 @pytest.mark.smoke
-def test_save_and_load_round_trip(tmp_path: "Path") -> None:  # noqa: F821
-    from pathlib import Path
+def test_save_and_load_round_trip(tmp_path: Path) -> None:  # noqa: F821
 
     idx = BM25Index()
     chunks = _make_chunks(4)

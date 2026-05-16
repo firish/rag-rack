@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from verifiable_rag.chunkers import Chunker
 from verifiable_rag.embedders import Embedder
@@ -56,13 +57,34 @@ class Pipeline:
 
         Returns the parsed Document so callers can inspect sentence IDs.
         """
+        document, chunks, embeddings = self.prepare_ingest(path)
+        self.commit_ingest(document, chunks, embeddings)
+        return document
+
+    def prepare_ingest(
+        self, path: str | Path
+    ) -> tuple[Document, list[Any], list[list[float]]]:
+        """Parse, chunk, and embed *path* without touching the shared index.
+
+        Split out from ``ingest()`` so the slow work (parse + embed) can run
+        concurrently across threads while ``commit_ingest()`` is serialised
+        behind a lock to keep the index consistent.
+        """
         p = Path(path)
         document = self.parser.parse(p)
         chunks = self.chunker.chunk(document)
         embeddings = self.embedder.embed([c.text for c in chunks])
+        return document, chunks, embeddings
+
+    def commit_ingest(
+        self,
+        document: Document,
+        chunks: list[Any],
+        embeddings: list[list[float]],
+    ) -> None:
+        """Atomically write a prepared ingest to the shared index + doc map."""
         self.indexer.add(chunks, embeddings)
         self._documents[document.doc_id] = document
-        return document
 
     def ask(self, query: str) -> Answer:
         """Run the full pipeline for *query* and return a verified Answer."""

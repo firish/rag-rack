@@ -25,5 +25,6 @@ class Reranker(Protocol):
 
 # Concrete implementations — imported after Protocol to avoid circular imports
 from verifiable_rag.rerankers.bge import BGERerankerV2  # noqa: E402
+from verifiable_rag.rerankers.cohere_reranker import CohereReranker  # noqa: E402
 
-__all__ = ["Reranker", "BGERerankerV2"]
+__all__ = ["Reranker", "BGERerankerV2", "CohereReranker"]

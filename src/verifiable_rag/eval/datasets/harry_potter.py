@@ -263,10 +263,7 @@ _QUESTIONS: list[EvalQuestion] = [
     # retrieval.
     EvalQuestion(
         id="hp_ollivander_wand_connection",
-        question=(
-            "What does Mr. Ollivander tell Harry about the phoenix feather "
-            "in his wand?"
-        ),
+        question=("What does Mr. Ollivander tell Harry about the phoenix feather in his wand?"),
         document_paths=(_PDF,),
         gold_sentence_ids=frozenset({_sid(1743)}),
         gold_answer_text=(
@@ -362,14 +359,10 @@ _QUESTIONS: list[EvalQuestion] = [
     ),
     EvalQuestion(
         id="hp_quote_dwell_on_dreams",
-        question=(
-            "Who says 'It does not do to dwell on dreams and forget to live'?"
-        ),
+        question=("Who says 'It does not do to dwell on dreams and forget to live'?"),
         document_paths=(_PDF,),
         gold_sentence_ids=frozenset({_sid(4329), _sid(4330), _sid(4331), _sid(4332)}),
-        gold_answer_text=(
-            "Dumbledore, after finding Harry at the Mirror of Erised."
-        ),
+        gold_answer_text=("Dumbledore, after finding Harry at the Mirror of Erised."),
     ),
     # -------- Partial-information refusal --------------------------------
     # The topic exists in the book, but the specific question isn't answered.
@@ -384,9 +377,7 @@ _QUESTIONS: list[EvalQuestion] = [
     ),
     EvalQuestion(
         id="hp_refuse_petunia_lily_feelings",
-        question=(
-            "What were Aunt Petunia's true feelings about her sister Lily?"
-        ),
+        question=("What were Aunt Petunia's true feelings about her sister Lily?"),
         document_paths=(_PDF,),
         gold_sentence_ids=frozenset(),
         should_refuse=True,
@@ -412,9 +403,7 @@ _QUESTIONS: list[EvalQuestion] = [
     ),
     EvalQuestion(
         id="hp_cursed_broomstick",
-        question=(
-            "Who cursed Harry's broomstick during his first Quidditch match?"
-        ),
+        question=("Who cursed Harry's broomstick during his first Quidditch match?"),
         document_paths=(_PDF,),
         # Truth is revealed at the climax: Quirrell, not Snape.
         # Early passages (s3869) explicitly accuse Snape — those are the

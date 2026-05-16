@@ -379,4 +379,5 @@ class DoclingParser:
             sections=sections,
             page_breaks=page_breaks,
             full_text=full_text,
+            parser_name="docling",
         )

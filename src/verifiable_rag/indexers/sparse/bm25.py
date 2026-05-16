@@ -53,22 +53,34 @@ class BM25Index:
         self._method = method
         self._index: Any = None
         self._corpus: list[dict[str, Any]] = []
+        # Marked dirty whenever the corpus changes; rebuild is deferred until
+        # the next search()/save() so a bulk ingest of N PDFs is O(N) instead
+        # of O(N²) full rebuilds.
+        self._dirty: bool = False
 
     # ------------------------------------------------------------------ #
     # SparseIndex Protocol
     # ------------------------------------------------------------------ #
 
     def add(self, chunks: list[Chunk]) -> None:
-        """Index *chunks*.  Rebuilds the internal BM25 index from scratch."""
+        """Append *chunks* to the corpus; rebuild is deferred to next search().
+
+        Lazy rebuild: the internal BM25 matrix is only recomputed on the next
+        ``search()`` (or ``save()``). This keeps a bulk ingest of N PDFs O(N)
+        rather than O(N²) — previously every ``add()`` re-tokenised the entire
+        corpus.
+        """
         if not chunks:
             return
         self._corpus.extend(self._chunk_to_row(c) for c in chunks)
-        self._rebuild()
+        self._dirty = True
 
     def search(self, query: str, k: int) -> list[RetrievedChunk]:
         """Return up to *k* chunks ranked by BM25 score for *query*."""
-        if self._index is None or not self._corpus:
+        if not self._corpus:
             return []
+        if self._dirty or self._index is None:
+            self._rebuild()
 
         bm25s = self._import_bm25s()
         tokenizer = self._tokenize or bm25s.tokenize
@@ -96,11 +108,14 @@ class BM25Index:
         """Remove all indexed documents."""
         self._index = None
         self._corpus = []
+        self._dirty = False
 
     def save(self, path: str | Path) -> None:
         """Persist the index and corpus to *path* directory."""
-        if self._index is None:
+        if not self._corpus:
             raise RuntimeError("Nothing to save — index is empty.")
+        if self._dirty or self._index is None:
+            self._rebuild()
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
         self._index.save(str(path / "bm25"))
@@ -144,6 +159,7 @@ class BM25Index:
         index = bm25s.BM25(method=self._method)
         index.index(tokenized)
         self._index = index
+        self._dirty = False
 
     @staticmethod
     def _chunk_to_row(chunk: Chunk) -> dict[str, Any]:

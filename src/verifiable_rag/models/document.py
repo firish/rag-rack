@@ -77,6 +77,12 @@ class Document:
     page_breaks: list[int] = field(default_factory=list)
     full_text: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    # Set by the parser that produced this Document (e.g. "docling",
+    # "pymupdf"). Lets downstream code slice metrics by parser path
+    # without resorting to post-hoc heuristics on section structure.
+    # Optional for backwards compat with caches written before this field
+    # existed — None means "unknown".
+    parser_name: str | None = None
 
     def __post_init__(self) -> None:
         if self.page_breaks:

@@ -186,6 +186,92 @@ def score_records(
 
 
 # --------------------------------------------------------------------------- #
+# Multi-choice scoring (LitQA2-style benchmarks)
+# --------------------------------------------------------------------------- #
+
+
+def multi_choice_selected(
+    answer_text: str,
+    ideal: str,
+    distractors: list[str],
+) -> str | None:
+    """Pick the multi-choice option the LLM chose from its freeform answer.
+
+    Word-boundary regex match for each option (case-insensitive) so short
+    options don't false-match inside other words (e.g. ``"y"`` inside
+    ``"answer"``).
+
+    Returns:
+        * the ideal/distractor string that matches exactly one option
+        * ``None`` if zero or multiple options match (ambiguous / refusal)
+
+    Same general approach PaperQA2 uses for LitQA2 scoring.
+    """
+    import re as _re
+
+    if not answer_text:
+        return None
+    lowered = answer_text.lower()
+    options = [ideal] + list(distractors)
+    matches: list[str] = []
+    for opt in options:
+        if not opt:
+            continue
+        pattern = r"\b" + _re.escape(opt.lower()) + r"\b"
+        if _re.search(pattern, lowered):
+            matches.append(opt)
+    if len(matches) == 1:
+        return matches[0]
+    return None
+
+
+def multi_choice_accuracy(
+    records: list[EvalRecord],
+    gold_by_id: dict[str, tuple[str, list[str]]],
+) -> dict[str, float]:
+    """Score a benchmark with multi-choice gold answers.
+
+    *gold_by_id* maps ``question_id -> (ideal, distractors)``.
+
+    Returns:
+        ``{"mc_correct": float, "mc_wrong": float, "mc_unanswered": float,
+        "mc_accuracy_over_answered": float, "mc_accuracy_over_all": float,
+        "n_questions": float, "n_errors": float}``
+
+    Two accuracy numbers because LitQA2 reports both:
+        * "over answered" = correct / (correct + wrong)
+        * "over all" = correct / total
+    """
+    correct = wrong = unanswered = errors = 0
+    for r in records:
+        if r.error is not None:
+            errors += 1
+            continue
+        if r.question_id not in gold_by_id:
+            continue
+        ideal, distractors = gold_by_id[r.question_id]
+        selected = multi_choice_selected(r.answer_text, ideal, distractors)
+        if selected is None:
+            unanswered += 1
+        elif selected.lower() == ideal.lower():
+            correct += 1
+        else:
+            wrong += 1
+
+    answered = correct + wrong
+    total = correct + wrong + unanswered
+    return {
+        "mc_correct": float(correct),
+        "mc_wrong": float(wrong),
+        "mc_unanswered": float(unanswered),
+        "mc_accuracy_over_answered": correct / answered if answered else 0.0,
+        "mc_accuracy_over_all": correct / total if total else 0.0,
+        "n_questions": float(len(records)),
+        "n_errors": float(errors),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
 

@@ -14,7 +14,6 @@ from verifiable_rag.eval.metrics import (
     score_records,
 )
 
-
 # --------------------------------------------------------------------------- #
 # citation_set_metrics
 # --------------------------------------------------------------------------- #
@@ -108,7 +107,9 @@ def test_aggregate_all_doubly_empty_returns_perfect() -> None:
 
 @pytest.mark.smoke
 def test_abstention_perfect() -> None:
-    m = abstention_metrics(refused=[True, True, False, False], should_refuse=[True, True, False, False])
+    m = abstention_metrics(
+        refused=[True, True, False, False], should_refuse=[True, True, False, False]
+    )
     assert m.precision == 1.0
     assert m.recall == 1.0
     assert m.f1 == 1.0
@@ -119,7 +120,9 @@ def test_abstention_over_refusal() -> None:
     """Refusing answerable questions hurts precision."""
     # Refused: T T T F   Should refuse: T F F F
     # tp=1, fp=2, fn=0 → precision=1/3, recall=1/1
-    m = abstention_metrics(refused=[True, True, True, False], should_refuse=[True, False, False, False])
+    m = abstention_metrics(
+        refused=[True, True, True, False], should_refuse=[True, False, False, False]
+    )
     assert m.precision == pytest.approx(1 / 3)
     assert m.recall == 1.0
 
@@ -129,7 +132,9 @@ def test_abstention_under_refusal() -> None:
     """Failing to refuse unsupportable questions hurts recall."""
     # Refused: F F F F   Should refuse: T T F F
     # tp=0, fp=0, fn=2 → precision=1.0 (vacuous), recall=0
-    m = abstention_metrics(refused=[False, False, False, False], should_refuse=[True, True, False, False])
+    m = abstention_metrics(
+        refused=[False, False, False, False], should_refuse=[True, True, False, False]
+    )
     assert m.precision == 1.0
     assert m.recall == 0.0
 

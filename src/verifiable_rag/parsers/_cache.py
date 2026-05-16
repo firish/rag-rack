@@ -35,13 +35,22 @@ def file_content_hash(path: Path) -> str:
 
 
 class DocumentCache:
-    """Low-level cache: get/put Documents keyed by source-file content hash."""
+    """Low-level cache: get/put Documents keyed by source-file content hash.
+
+    Caches both successes (the parsed Document) and failures (the error
+    message). Negative caching is what stops us from re-OCRing the same
+    broken PDF every run — a failed parse leaves a ``.failed.json`` marker
+    that subsequent calls check first.
+    """
 
     def __init__(self, cache_dir: Path = DEFAULT_CACHE_DIR) -> None:
         self._dir = cache_dir
 
     def _cache_path(self, source_path: Path) -> Path:
         return self._dir / f"{file_content_hash(source_path)}.json"
+
+    def _failure_path(self, source_path: Path) -> Path:
+        return self._dir / f"{file_content_hash(source_path)}.failed.json"
 
     def get(self, source_path: Path) -> Document | None:
         cache_file = self._cache_path(source_path)
@@ -54,11 +63,33 @@ class DocumentCache:
             cache_file.unlink(missing_ok=True)
             return None
 
+    def get_failure(self, source_path: Path) -> str | None:
+        """Return the cached error string for *source_path*, or None."""
+        f = self._failure_path(source_path)
+        if not f.exists():
+            return None
+        try:
+            data = json.loads(f.read_text())
+            error = data.get("error")
+            return error if isinstance(error, str) else None
+        except (OSError, json.JSONDecodeError):
+            return None
+
     def put(self, source_path: Path, doc: Document) -> None:
         save_document(doc, self._cache_path(source_path))
+        # Successful parse supersedes any prior failure marker.
+        self._failure_path(source_path).unlink(missing_ok=True)
+
+    def put_failure(self, source_path: Path, error: str) -> None:
+        """Record that parsing *source_path* failed with *error*."""
+        self._dir.mkdir(parents=True, exist_ok=True)
+        self._failure_path(source_path).write_text(
+            json.dumps({"error": error}, ensure_ascii=False)
+        )
 
     def invalidate(self, source_path: Path) -> None:
         self._cache_path(source_path).unlink(missing_ok=True)
+        self._failure_path(source_path).unlink(missing_ok=True)
 
     def clear(self) -> None:
         if self._dir.exists():
@@ -88,7 +119,17 @@ class CachingParser:
         cached = self._cache.get(path)
         if cached is not None:
             return cached
-        doc = self._parser.parse(path)
+        cached_failure = self._cache.get_failure(path)
+        if cached_failure is not None:
+            # Skip the expensive re-parse — we already know it fails.
+            raise ValueError(f"Cached parse failure for {path}: {cached_failure}")
+        try:
+            doc = self._parser.parse(path)
+        except (ValueError, AssertionError) as exc:
+            # Record the failure so future runs short-circuit instead of
+            # re-running the entire parser (which on Docling means re-OCR).
+            self._cache.put_failure(path, f"{type(exc).__name__}: {exc}")
+            raise
         self._cache.put(path, doc)
         return doc
 

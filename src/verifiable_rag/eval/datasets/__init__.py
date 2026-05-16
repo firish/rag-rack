@@ -1,10 +1,12 @@
 """Built-in benchmarks for verifiable-rag eval harness.
 
-Tier 1 ships with one benchmark:
-  - HarryPotterMicroBench: 15 hand-curated questions on the cached HP book 1
-    PDF in tests/parsers/fixtures/sample.pdf.
+Currently shipping:
+  - HarryPotterMicroBench: 29 hand-curated questions on the cached HP book 1
+    PDF (tests/parsers/fixtures/sample.pdf).
+  - LitQA2Bench: 199 multi-choice scientific-paper questions from the
+    LAB-Bench dataset on HuggingFace.
 
-Tier 2 will add LitQA2, RAGTruth, HaluBench (currently stubs).
+Planned: RAGTruth (faithfulness calibration), HaluBench (hallucination).
 """
 
 from __future__ import annotations
@@ -12,21 +14,23 @@ from __future__ import annotations
 from typing import Any
 
 from verifiable_rag.eval.datasets.harry_potter import HarryPotterMicroBench
-
-
-def load_litqa2(cache_dir: str = "benchmarks/data/litqa2") -> list[dict[str, Any]]:
-    """Load LitQA2 benchmark. Stub — implement in Tier 2."""
-    raise NotImplementedError("Implement LitQA2 loader in Tier 2")
+from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench, load_litqa2_meta
 
 
 def load_ragtruth(cache_dir: str = "benchmarks/data/ragtruth") -> list[dict[str, Any]]:
-    """Load RAGTruth benchmark. Stub — implement in Tier 2."""
-    raise NotImplementedError("Implement RAGTruth loader in Tier 2")
+    """Load RAGTruth benchmark. Stub — implement when needed for verifier calibration."""
+    raise NotImplementedError("RAGTruth loader not yet implemented")
 
 
 def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict[str, Any]]:
-    """Load HaluBench benchmark. Stub — implement in Tier 2."""
-    raise NotImplementedError("Implement HaluBench loader in Tier 2")
+    """Load HaluBench benchmark. Stub — implement when needed."""
+    raise NotImplementedError("HaluBench loader not yet implemented")
 
 
-__all__ = ["HarryPotterMicroBench", "load_litqa2", "load_ragtruth", "load_halubench"]
+__all__ = [
+    "HarryPotterMicroBench",
+    "LitQA2Bench",
+    "load_litqa2_meta",
+    "load_ragtruth",
+    "load_halubench",
+]

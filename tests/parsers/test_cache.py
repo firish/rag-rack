@@ -166,3 +166,88 @@ def test_caching_parser_satisfies_parser_protocol() -> None:
 
     parser = CachingParser(_CountingParser(_make_doc()))
     assert isinstance(parser, Parser)
+
+
+# --------------------------------------------------------------------------- #
+# Negative cache — failure markers prevent re-parsing broken PDFs
+# --------------------------------------------------------------------------- #
+
+
+class _AlwaysFailsParser:
+    def __init__(self, exc: Exception) -> None:
+        self._exc = exc
+        self.calls = 0
+
+    def parse(self, path: Path) -> Document:
+        self.calls += 1
+        raise self._exc
+
+
+@pytest.mark.smoke
+def test_failure_cache_get_returns_none_when_absent(tmp_path: Path) -> None:
+    src = tmp_path / "doc.pdf"
+    src.write_bytes(b"content")
+    cache = DocumentCache(tmp_path / "cache")
+    assert cache.get_failure(src) is None
+
+
+@pytest.mark.smoke
+def test_failure_cache_roundtrip(tmp_path: Path) -> None:
+    src = tmp_path / "doc.pdf"
+    src.write_bytes(b"content")
+    cache = DocumentCache(tmp_path / "cache")
+    cache.put_failure(src, "ValueError: page_breaks must be sorted ascending")
+    assert cache.get_failure(src) == "ValueError: page_breaks must be sorted ascending"
+
+
+@pytest.mark.smoke
+def test_success_clears_prior_failure_marker(tmp_path: Path) -> None:
+    src = tmp_path / "doc.pdf"
+    src.write_bytes(b"content")
+    cache = DocumentCache(tmp_path / "cache")
+    cache.put_failure(src, "old failure")
+    cache.put(src, _make_doc())
+    assert cache.get_failure(src) is None
+
+
+@pytest.mark.smoke
+def test_caching_parser_records_and_short_circuits_failure(tmp_path: Path) -> None:
+    """The expensive parser is called once; future calls hit the negative cache."""
+    src = tmp_path / "broken.pdf"
+    src.write_bytes(b"broken pdf bytes")
+
+    underlying = _AlwaysFailsParser(ValueError("page_breaks must be sorted ascending"))
+    parser = CachingParser(underlying, cache_dir=tmp_path / "cache")
+
+    with pytest.raises(ValueError, match="page_breaks"):
+        parser.parse(src)
+    with pytest.raises(ValueError, match="Cached parse failure"):
+        parser.parse(src)
+    with pytest.raises(ValueError, match="Cached parse failure"):
+        parser.parse(src)
+    # Underlying parser was only ever called once — that is the whole point.
+    assert underlying.calls == 1
+
+
+@pytest.mark.smoke
+def test_caching_parser_caches_assertion_failures(tmp_path: Path) -> None:
+    src = tmp_path / "bad.pdf"
+    src.write_bytes(b"bytes")
+    underlying = _AlwaysFailsParser(AssertionError("internal"))
+    parser = CachingParser(underlying, cache_dir=tmp_path / "cache")
+
+    with pytest.raises(AssertionError):
+        parser.parse(src)
+    with pytest.raises(ValueError, match="Cached parse failure"):
+        parser.parse(src)
+    assert underlying.calls == 1
+
+
+@pytest.mark.smoke
+def test_invalidate_clears_failure_marker_too(tmp_path: Path) -> None:
+    src = tmp_path / "doc.pdf"
+    src.write_bytes(b"bytes")
+    cache = DocumentCache(tmp_path / "cache")
+    cache.put_failure(src, "boom")
+    cache.invalidate(src)
+    assert cache.get_failure(src) is None

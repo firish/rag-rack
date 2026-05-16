@@ -141,6 +141,23 @@ def test_serde_missing_version_rejected() -> None:
 
 
 @pytest.mark.smoke
+def test_serde_roundtrips_parser_name() -> None:
+    doc = _build_rich_document()
+    object.__setattr__(doc, "parser_name", "pymupdf")  # frozen-ish via dataclass=normal
+    restored = document_from_dict(document_to_dict(doc))
+    assert restored.parser_name == "pymupdf"
+
+
+@pytest.mark.smoke
+def test_serde_parser_name_missing_in_old_cache_defaults_to_none() -> None:
+    payload = document_to_dict(_build_rich_document())
+    # Simulate a cache file written before the parser_name field existed.
+    payload.pop("parser_name", None)
+    restored = document_from_dict(payload)
+    assert restored.parser_name is None
+
+
+@pytest.mark.smoke
 def test_serde_handles_empty_sections_and_no_full_text() -> None:
     doc = Document(
         doc_id="empty-doc",

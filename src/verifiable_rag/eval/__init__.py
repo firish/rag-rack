@@ -72,12 +72,24 @@ class EvalRecord:
 
 @dataclass
 class EvalReport:
-    """Aggregate result of running a benchmark."""
+    """Aggregate result of running a benchmark.
+
+    *discarded_question_ids* are questions whose source PDFs all failed to
+    parse — they are excluded from records and from every metric so a
+    broken upstream PDF doesn't silently drag the numbers down.
+
+    *parsers_by_question_id* records which parser produced each question's
+    source PDFs (e.g. ``{"q1": ["docling"], "q2": ["pymupdf", "docling"]}``).
+    Lets downstream tooling slice metrics by parser path without re-reading
+    the cache.
+    """
 
     benchmark_name: str
     pipeline_label: str
     records: list[EvalRecord] = field(default_factory=list)
     metrics: dict[str, float] = field(default_factory=dict)
+    discarded_question_ids: list[str] = field(default_factory=list)
+    parsers_by_question_id: dict[str, list[str]] = field(default_factory=dict)
 
 
 __all__ = [

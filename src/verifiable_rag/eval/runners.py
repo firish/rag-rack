@@ -4,7 +4,11 @@ The runner:
   1. Walks the benchmark to collect every unique document path.
   2. Ingests each document into the pipeline EXACTLY ONCE (sharing the
      index across all questions).
-  3. Runs ``pipeline.ask(question)`` for each EvalQuestion.
+  3. Runs ``pipeline.ask(question)`` for each EvalQuestion. With
+     ``max_workers > 1``, asks run concurrently via a ThreadPoolExecutor;
+     the LLM call dominates wall time and releases the GIL while waiting
+     on the network, so threads scale linearly until the model's rate
+     limit kicks in.
   4. Wraps the answer into an EvalRecord (catching pipeline errors so one
      bad question doesn't tank the whole run).
   5. Scores all records and returns a populated EvalReport.
@@ -15,7 +19,10 @@ benchmark survive a single LLM timeout or rate-limit blip.
 
 from __future__ import annotations
 
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from verifiable_rag.eval import Benchmark, EvalQuestion, EvalRecord, EvalReport
 from verifiable_rag.eval.metrics import score_records
@@ -29,6 +36,8 @@ def run_benchmark(
     max_questions: int | None = None,
     progress: bool = True,
     delay_between_questions: float = 0.0,
+    max_workers: int = 1,
+    ingest_workers: int = 1,
 ) -> EvalReport:
     """Run *benchmark* through *pipeline* and return a scored EvalReport.
 
@@ -40,12 +49,24 @@ def run_benchmark(
             + chunker config) so reports are self-describing.
         max_questions: cap for fast smoke runs; None = run all questions.
         progress: print "[i/N] question" before each ask().
+        delay_between_questions: seconds to sleep after each question. Only
+            applied when running sequentially (max_workers == 1) — under
+            concurrency the sleep doesn't pace the LLM in any useful way.
+        max_workers: parallelism for ask(). 1 = sequential (default).
+        ingest_workers: parallelism for the prepare phase of ingest
+            (parse + chunk + embed). The commit phase (index write) is
+            always serialised behind a lock for correctness.
     """
     questions = list(benchmark.questions())
     if max_questions is not None:
         questions = questions[:max_questions]
 
     # ---- 1) Ingest every unique document once ----------------------------
+    # Tolerate per-PDF failures (corrupt files, image-only scans, etc.) so
+    # one bad paper doesn't tank the whole benchmark run. We record which
+    # paths failed and use that set in (2) to discard questions whose
+    # sources didn't make it into the index.
+    unique_paths: list[Path] = []
     seen_paths: set[str] = set()
     for q in questions:
         for path in q.document_paths:
@@ -53,31 +74,186 @@ def run_benchmark(
             if key in seen_paths:
                 continue
             seen_paths.add(key)
+            unique_paths.append(path)
+
+    failed_path_keys, parser_by_path = _ingest_paths(
+        pipeline, unique_paths, ingest_workers, progress
+    )
+
+    # ---- 2) Drop questions whose every document failed to ingest ---------
+    # If even one source PDF parsed, we keep the question — the retriever
+    # can still find evidence in the surviving documents. We also build the
+    # parsers_by_question_id map so the report carries native parser
+    # provenance per question.
+    asked_questions: list[EvalQuestion] = []
+    discarded_ids: list[str] = []
+    parsers_by_question_id: dict[str, list[str]] = {}
+    for q in questions:
+        if not q.document_paths:
+            asked_questions.append(q)
+            parsers_by_question_id[q.id] = []
+            continue
+        all_failed = all(
+            str(p.resolve()) in failed_path_keys for p in q.document_paths
+        )
+        if all_failed:
+            discarded_ids.append(q.id)
             if progress:
-                print(f"[ingest] {path}")
-            pipeline.ingest(path)
+                print(f"[discard] {q.id}: all source PDFs failed to parse")
+        else:
+            asked_questions.append(q)
+            parsers_by_question_id[q.id] = [
+                parser_by_path.get(str(p.resolve()), "unknown")
+                for p in q.document_paths
+                if str(p.resolve()) not in failed_path_keys
+            ]
 
-    # ---- 2) Ask each question, collect records ---------------------------
-    records: list[EvalRecord] = []
-    gold_by_id: dict[str, tuple[frozenset[str], bool]] = {}
+    # ---- 3) Ask each surviving question, collect records ----------------
+    gold_by_id: dict[str, tuple[frozenset[str], bool]] = {
+        q.id: (q.gold_sentence_ids, q.should_refuse) for q in asked_questions
+    }
 
-    total = len(questions)
-    for i, q in enumerate(questions, start=1):
-        gold_by_id[q.id] = (q.gold_sentence_ids, q.should_refuse)
-        if progress:
-            print(f"[ask {i}/{total}] {q.id}: {q.question}")
-        records.append(_ask_one(pipeline, q))
-        if delay_between_questions and i < total:
-            time.sleep(delay_between_questions)
+    total = len(asked_questions)
+    if max_workers > 1 and total > 1:
+        records = _ask_parallel(pipeline, asked_questions, max_workers, progress)
+    else:
+        records = _ask_sequential(
+            pipeline, asked_questions, progress, delay_between_questions
+        )
 
-    # ---- 3) Score and return ---------------------------------------------
+    # ---- 4) Score and return --------------------------------------------
     report = EvalReport(
         benchmark_name=benchmark.name,
         pipeline_label=pipeline_label,
         records=records,
+        discarded_question_ids=discarded_ids,
+        parsers_by_question_id=parsers_by_question_id,
     )
     report.metrics = score_records(records, gold_by_id)
+    report.metrics["n_discarded"] = float(len(discarded_ids))
     return report
+
+
+def _ingest_paths(
+    pipeline: Pipeline,
+    paths: list[Path],
+    workers: int,
+    progress: bool,
+) -> tuple[set[str], dict[str, str]]:
+    """Ingest a list of unique paths.
+
+    Returns ``(failed_keys, parser_by_path)`` where:
+      * ``failed_keys`` is ``{str(path.resolve()) for every failed path}``
+      * ``parser_by_path`` maps resolved path → ``Document.parser_name`` (or
+        ``"unknown"`` if the parser didn't set it) for every *successful*
+        ingest.
+    """
+    failed_keys: set[str] = set()
+    parser_by_path: dict[str, str] = {}
+    total = len(paths)
+    if total == 0:
+        return failed_keys, parser_by_path
+
+    commit_lock = threading.Lock()
+    counter = {"done": 0, "failed": 0}
+
+    def _record_failure(path: Path, exc: BaseException) -> None:
+        failed_keys.add(str(path.resolve()))
+        counter["failed"] += 1
+        counter["done"] += 1
+        print(
+            f"[ingest-FAIL {counter['done']}/{total}] {path}: "
+            f"{type(exc).__name__}: {exc}",
+            flush=True,
+        )
+
+    def _one(path: Path) -> None:
+        try:
+            prepared = pipeline.prepare_ingest(path)
+        except Exception as exc:  # noqa: BLE001
+            with commit_lock:
+                _record_failure(path, exc)
+            return
+        document = prepared[0]  # (document, chunks, embeddings)
+        with commit_lock:
+            try:
+                pipeline.commit_ingest(*prepared)
+            except Exception as exc:  # noqa: BLE001
+                _record_failure(path, exc)
+                return
+            parser_by_path[str(path.resolve())] = document.parser_name or "unknown"
+            counter["done"] += 1
+            if progress:
+                print(f"[ingest {counter['done']}/{total}] {path}", flush=True)
+
+    if workers > 1 and total > 1:
+        if progress:
+            print(
+                f"[parallel-ingest] {total} docs with {workers} workers",
+                flush=True,
+            )
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            list(pool.map(_one, paths))
+    else:
+        for p in paths:
+            _one(p)
+    return failed_keys, parser_by_path
+
+
+def _ask_sequential(
+    pipeline: Pipeline,
+    questions: list[EvalQuestion],
+    progress: bool,
+    delay_between_questions: float,
+) -> list[EvalRecord]:
+    records: list[EvalRecord] = []
+    total = len(questions)
+    for i, q in enumerate(questions, start=1):
+        if progress:
+            print(f"[ask {i}/{total}] {q.id}: {q.question}", flush=True)
+        records.append(_ask_one(pipeline, q))
+        if delay_between_questions and i < total:
+            time.sleep(delay_between_questions)
+    return records
+
+
+def _ask_parallel(
+    pipeline: Pipeline,
+    questions: list[EvalQuestion],
+    max_workers: int,
+    progress: bool,
+) -> list[EvalRecord]:
+    """Run asks concurrently while preserving question order in the output.
+
+    The Pipeline's per-ask state (retrieval → rerank → generate → verify) is
+    read-only against the shared index and documents dict, so threads are
+    safe. The LLM call is the long pole and releases the GIL; embed/rerank/
+    verify steps are torch CPU ops that share the GIL but are tiny relative
+    to the network round-trip.
+    """
+    total = len(questions)
+    results: list[EvalRecord | None] = [None] * total
+    print_lock = threading.Lock()
+    counter = {"done": 0}
+
+    def _run(idx: int, q: EvalQuestion) -> None:
+        rec = _ask_one(pipeline, q)
+        if progress:
+            with print_lock:
+                counter["done"] += 1
+                print(f"[ask {counter['done']}/{total}] {q.id}: done", flush=True)
+        results[idx] = rec
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        if progress:
+            print(
+                f"[parallel] running {total} questions with {max_workers} workers",
+                flush=True,
+            )
+        list(pool.map(lambda iq: _run(iq[0], iq[1]), enumerate(questions)))
+
+    # All slots are filled because _ask_one catches exceptions internally.
+    return [r for r in results if r is not None]
 
 
 def _ask_one(pipeline: Pipeline, question: EvalQuestion) -> EvalRecord:

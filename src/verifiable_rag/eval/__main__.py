@@ -20,33 +20,46 @@ from datetime import datetime
 from pathlib import Path
 
 from verifiable_rag.chunkers import ParentChildChunker
-from verifiable_rag.embedders import SentenceTransformerEmbedder
+from verifiable_rag.embedders import CohereEmbedder, SentenceTransformerEmbedder
 from verifiable_rag.eval import EvalReport
-from verifiable_rag.eval.datasets import HarryPotterMicroBench
+from verifiable_rag.eval.datasets import (
+    HarryPotterMicroBench,
+    LitQA2Bench,
+    load_litqa2_meta,
+)
+from verifiable_rag.eval.metrics import multi_choice_accuracy
 from verifiable_rag.eval.reporter import write_markdown
 from verifiable_rag.eval.runners import run_benchmark
 from verifiable_rag.generators import PromptedCitedGenerator
 from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
 from verifiable_rag.models.answer import Strictness
-from verifiable_rag.parsers import CachingParser, DoclingParser
+from verifiable_rag.parsers import (
+    CachingParser,
+    CompositeParser,
+    DoclingParser,
+    PyMuPDFParser,
+)
 from verifiable_rag.pipeline import Pipeline
-from verifiable_rag.rerankers import BGERerankerV2
+from verifiable_rag.rerankers import BGERerankerV2, CohereReranker
 from verifiable_rag.verifiers import HHEMVerifier
 
 _BENCHMARKS = {
     "harry_potter_micro": HarryPotterMicroBench,
+    "litqa2": LitQA2Bench,
 }
 
 
 def build_baseline_pipeline(
     model: str,
     min_child_tokens: int = 100,
-    use_reranker: bool = True,
+    embedder_name: str = "bge",
+    reranker_name: str = "bge",
     verifier_name: str = "none",
     verifier_threshold: float = 0.3,
     strictness: Strictness = "loose",
     top_k_retrieve: int = 80,
     top_k_rerank: int = 8,
+    index_dir: Path = Path(".verifiable_rag_cache/indexes/eval_lance"),
 ) -> Pipeline:
     """Wire the eval pipeline.
 
@@ -65,18 +78,46 @@ def build_baseline_pipeline(
     """
     verifier = HHEMVerifier(threshold=verifier_threshold) if verifier_name == "hhem" else None
 
+    from verifiable_rag.embedders import Embedder
+    from verifiable_rag.rerankers import Reranker
+
+    embedder: Embedder
+    if embedder_name == "bge":
+        embedder = SentenceTransformerEmbedder(model_name="BAAI/bge-small-en-v1.5")
+    elif embedder_name == "cohere":
+        embedder = CohereEmbedder()
+    else:
+        raise ValueError(f"Unknown embedder {embedder_name!r}; choose 'bge' or 'cohere'.")
+
+    reranker: Reranker | None
+    if reranker_name == "none":
+        reranker = None
+    elif reranker_name == "bge":
+        reranker = BGERerankerV2()
+    elif reranker_name == "cohere":
+        reranker = CohereReranker()
+    else:
+        raise ValueError(
+            f"Unknown reranker {reranker_name!r}; choose 'none', 'bge', or 'cohere'."
+        )
+
     return Pipeline(
-        parser=CachingParser(DoclingParser()),
+        parser=CachingParser(
+            CompositeParser(
+                primary=DoclingParser(),
+                fallbacks=[PyMuPDFParser()],
+            )
+        ),
         chunker=ParentChildChunker(
             max_child_tokens=400,
             min_child_tokens=min_child_tokens,
         ),
-        embedder=SentenceTransformerEmbedder(model_name="BAAI/bge-small-en-v1.5"),
+        embedder=embedder,
         indexer=HybridIndex(
-            dense=LanceDBIndex(uri=Path(".verifiable_rag_cache/indexes/eval_lance")),
+            dense=LanceDBIndex(uri=index_dir),
             sparse=BM25Index(),
         ),
-        reranker=BGERerankerV2() if use_reranker else None,
+        reranker=reranker,
         verifier=verifier,
         generator=PromptedCitedGenerator(model=model),
         strictness=strictness,
@@ -132,9 +173,28 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--embedder",
+        choices=("bge", "cohere"),
+        default="bge",
+        help=(
+            "Dense embedder. bge=BGE-small (local, free, 384-dim). "
+            "cohere=embed-english-v3.0 (hosted, $0.10/1M tokens, 1024-dim, "
+            "better quality). Switching invalidates any existing index."
+        ),
+    )
+    p.add_argument(
+        "--reranker",
+        choices=("none", "bge", "cohere"),
+        default="bge",
+        help=(
+            "Reranker stage. bge=local CPU (slow but free). cohere=hosted "
+            "(fast, ~$0.002/query). none=skip reranking (quality drops)."
+        ),
+    )
+    p.add_argument(
         "--no-reranker",
         action="store_true",
-        help="Disable the BGE cross-encoder reranker (for ablation).",
+        help="Back-compat: equivalent to --reranker none.",
     )
     p.add_argument(
         "--top-k-retrieve",
@@ -165,6 +225,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--index-dir",
+        type=Path,
+        default=Path(".verifiable_rag_cache/indexes/eval_lance"),
+        help=(
+            "LanceDB index directory. Use a different path when running two "
+            "evals concurrently (each needs its own index)."
+        ),
+    )
+    p.add_argument(
+        "--max-workers",
+        type=int,
+        default=1,
+        help=(
+            "Parallelism for question asks. 1 = sequential (default). "
+            "Use >1 only on paid LLM tiers — free tiers (Groq, Gemini) "
+            "rate-limit hard. Haiku/Sonnet/4o-mini are fine at 10-20."
+        ),
+    )
+    p.add_argument(
+        "--ingest-workers",
+        type=int,
+        default=1,
+        help=(
+            "Parallelism for ingest (parse+chunk+embed). 1 = sequential "
+            "(default). 4-8 is a good range on a multi-core box for "
+            "BGE-small + cached parses."
+        ),
+    )
+    p.add_argument(
         "--verifier-threshold",
         type=float,
         default=0.3,
@@ -189,33 +278,52 @@ def _print_summary(report: EvalReport) -> None:
         "abstention_precision",
         "abstention_recall",
         "abstention_f1",
+        # Multi-choice (LitQA2) metrics — only present for that benchmark
+        "mc_correct",
+        "mc_wrong",
+        "mc_unanswered",
+        "mc_accuracy_over_answered",
+        "mc_accuracy_over_all",
     ):
         if key in report.metrics:
-            print(f"  {key:<24s} {report.metrics[key]:.3f}")
+            print(f"  {key:<28s} {report.metrics[key]:.3f}")
     if report.metrics.get("n_errors"):
-        print(f"  {'errors':<24s} {int(report.metrics['n_errors'])}")
+        print(f"  {'errors':<28s} {int(report.metrics['n_errors'])}")
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
+    # Back-compat: --no-reranker overrides --reranker if explicitly passed.
+    effective_reranker = "none" if args.no_reranker else args.reranker
+
     benchmark = _BENCHMARKS[args.benchmark]()
     pipeline = build_baseline_pipeline(
         args.model,
         min_child_tokens=args.min_tokens,
-        use_reranker=not args.no_reranker,
+        embedder_name=args.embedder,
+        reranker_name=effective_reranker,
         verifier_name=args.verifier,
         verifier_threshold=args.verifier_threshold,
         strictness=args.strictness,
         top_k_retrieve=args.top_k_retrieve,
         top_k_rerank=args.top_k_rerank,
+        index_dir=args.index_dir,
     )
-    rerank_label = "bge-rerank-v2-m3" if not args.no_reranker else "no-reranker"
+    rerank_label = {
+        "none": "no-reranker",
+        "bge": "bge-rerank-v2-m3",
+        "cohere": "cohere-rerank-v3",
+    }[effective_reranker]
+    embedder_label = {
+        "bge": "bge-small",
+        "cohere": "cohere-embed-v3",
+    }[args.embedder]
     verifier_label = (
         f"hhem-2.1-open@{args.verifier_threshold}" if args.verifier == "hhem" else "no-verifier"
     )
     label = (
-        f"{args.model} | bge-small | hybrid(BM25+lance) | "
+        f"{args.model} | {embedder_label} | hybrid(BM25+lance) | "
         f"min_tokens={args.min_tokens} | {rerank_label} | "
         f"retrieve={args.top_k_retrieve}/rerank={args.top_k_rerank} | "
         f"{verifier_label} | {args.strictness}"
@@ -227,9 +335,22 @@ def main(argv: list[str] | None = None) -> int:
         pipeline_label=label,
         max_questions=args.max_questions,
         delay_between_questions=args.delay,
+        max_workers=args.max_workers,
+        ingest_workers=args.ingest_workers,
     )
 
     gold_by_id = {q.id: (q.gold_sentence_ids, q.should_refuse) for q in benchmark.questions()}
+
+    # LitQA2 has multi-choice gold — score that separately and merge into the
+    # report's metrics dict so the markdown table includes it.
+    if args.benchmark == "litqa2":
+        meta = load_litqa2_meta()
+        mc_gold = {qid: (m["ideal"], m["distractors"]) for qid, m in meta.items()}
+        mc_metrics = multi_choice_accuracy(report.records, mc_gold)
+        # Prefix MC metric keys for clarity in the report
+        for k, v in mc_metrics.items():
+            if k not in ("n_questions", "n_errors"):
+                report.metrics[k] = v
 
     out_path = args.out or Path(
         f"benchmarks/{args.benchmark}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"

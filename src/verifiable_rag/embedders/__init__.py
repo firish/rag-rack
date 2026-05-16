@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from verifiable_rag.embedders.cohere_embedder import CohereEmbedder
 from verifiable_rag.embedders.sentence_transformer import SentenceTransformerEmbedder
 from verifiable_rag.embedders.voyage import VoyageEmbedder
 
@@ -30,4 +31,4 @@ class Embedder(Protocol):
         ...
 
 
-__all__ = ["Embedder", "SentenceTransformerEmbedder", "VoyageEmbedder"]
+__all__ = ["Embedder", "SentenceTransformerEmbedder", "VoyageEmbedder", "CohereEmbedder"]

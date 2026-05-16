@@ -37,11 +37,15 @@ from verifiable_rag.parsers._sentence_splitter import (  # noqa: E402
     SentenceSpan,
     SentenceSplitter,
 )
+from verifiable_rag.parsers.composite import CompositeParser  # noqa: E402
 from verifiable_rag.parsers.docling_parser import DoclingParser  # noqa: E402
+from verifiable_rag.parsers.pymupdf_parser import PyMuPDFParser  # noqa: E402
 
 __all__ = [
     "Parser",
     "DoclingParser",
+    "PyMuPDFParser",
+    "CompositeParser",
     "CachingParser",
     "DocumentCache",
     "DEFAULT_CACHE_DIR",

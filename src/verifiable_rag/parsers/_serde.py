@@ -25,6 +25,7 @@ def document_to_dict(doc: Document) -> dict[str, Any]:
         "full_text": doc.full_text,
         "metadata": doc.metadata,
         "sections": [_section_to_dict(s) for s in doc.sections],
+        "parser_name": doc.parser_name,
     }
 
 
@@ -41,6 +42,9 @@ def document_from_dict(d: dict[str, Any]) -> Document:
         page_breaks=list(d.get("page_breaks", [])),
         full_text=d.get("full_text"),
         metadata=dict(d.get("metadata", {})),
+        # Optional field — caches written before this existed return None,
+        # which is the right "unknown provenance" sentinel.
+        parser_name=d.get("parser_name"),
     )
 
 
