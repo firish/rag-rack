@@ -185,8 +185,17 @@ class LitQA2Bench:
 
     @staticmethod
     def _is_refusal_answer(ideal: str) -> bool:
-        """Detect LitQA2's 'Insufficient information' style answers."""
+        """Detect LitQA2's 'Insufficient information' style answers.
+
+        Also matches the literal string ``"null"`` — a handful of LitQA2
+        rows have ``ideal='null'`` for genuinely unanswerable questions
+        (e.g. PLSCR5/GARIN3 questions where the paper doesn't cover the
+        requested entity). Treating them as ``should_refuse=True`` keeps
+        abstention metrics honest.
+        """
         lowered = ideal.lower().strip()
+        if lowered == "null":
+            return True
         return any(lowered.startswith(p) for p in _INSUFFICIENT_PREFIXES)
 
 

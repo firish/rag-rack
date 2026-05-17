@@ -165,6 +165,137 @@ def test_mc_selected_handles_empty_answer() -> None:
     assert multi_choice_selected("", "x", ["y"]) is None
 
 
+@pytest.mark.smoke
+def test_mc_selected_prefers_bold_over_substring_noise() -> None:
+    """Bold extraction wins even when distractor names also appear in prose."""
+    selected = multi_choice_selected(
+        answer_text=(
+            "Based on the provided sources, the best answer is: "
+            "**ciprofloxacin**. The mutant evolution experiments rule out "
+            "meropenem and gentamicin."
+        ),
+        ideal="ciprofloxacin",
+        distractors=["meropenem", "gentamicin", "ampicillin"],
+    )
+    assert selected == "ciprofloxacin"
+
+
+@pytest.mark.smoke
+def test_mc_selected_last_bold_wins_when_llm_walks_options() -> None:
+    """LLM mentions one option in bold, then concludes with a different bold."""
+    selected = multi_choice_selected(
+        answer_text=(
+            "First I considered **vasculitis**, but it isn't in the options. "
+            "Among the choices, the best answer is **acute respiratory "
+            "distress syndrome**."
+        ),
+        ideal="acute respiratory distress syndrome",
+        distractors=["vasculitis", "sepsis"],
+    )
+    assert selected == "acute respiratory distress syndrome"
+
+
+@pytest.mark.smoke
+def test_mc_selected_matches_percent_options() -> None:
+    """Options ending in '%' must match even when followed by punctuation."""
+    selected = multi_choice_selected(
+        answer_text="The flies eclose at approximately 80%. Best answer: 80%.",
+        ideal="80%",
+        distractors=["20%", "50%", "100%"],
+    )
+    assert selected == "80%"
+
+
+@pytest.mark.smoke
+def test_mc_selected_matches_negative_number_options() -> None:
+    """Options like '-3' must match even when bolded inside markdown."""
+    selected = multi_choice_selected(
+        answer_text="Serine favors degradation at position **-3** in the model.",
+        ideal="-3",
+        distractors=["-1", "-5", "-8"],
+    )
+    assert selected == "-3"
+
+
+@pytest.mark.smoke
+def test_mc_selected_bold_strips_trailing_punctuation() -> None:
+    """`**ciprofloxacin.**` should still match option 'ciprofloxacin'."""
+    selected = multi_choice_selected(
+        answer_text="The answer is **ciprofloxacin.**",
+        ideal="ciprofloxacin",
+        distractors=["meropenem"],
+    )
+    assert selected == "ciprofloxacin"
+
+
+@pytest.mark.smoke
+def test_mc_selected_strips_answer_prefix_in_bold() -> None:
+    """LLM wraps the option in 'Answer: X' / 'The best answer is: X'."""
+    cases = [
+        "**Answer: K548R**",
+        "**Best answer: K548R**",
+        "**The best answer is: K548R**",
+        "**The answer is: K548R**",
+    ]
+    for ans in cases:
+        selected = multi_choice_selected(
+            answer_text=ans,
+            ideal="K548R",
+            distractors=["K548A", "T549R"],
+        )
+        assert selected == "K548R", f"failed for: {ans!r}"
+
+
+@pytest.mark.smoke
+def test_mc_selected_nfkd_normalizes_unicode_superscripts() -> None:
+    """LLM uses pretty Unicode (`2.45 pM⁻¹`) but option uses ASCII (`2.45 pM-1`)."""
+    selected = multi_choice_selected(
+        answer_text="The dissociation constant is **2.45 pM⁻¹**",
+        ideal="2.45 pM-1",
+        distractors=["1.2 pM-1", "5.7 pM-1"],
+    )
+    assert selected == "2.45 pM-1"
+
+
+@pytest.mark.smoke
+def test_mc_selected_nfkd_handles_unicode_minus() -> None:
+    """U+2212 MINUS SIGN (−) maps to ASCII hyphen (-) for matching."""
+    selected = multi_choice_selected(
+        answer_text="The phenotype is **CD8−/IFNG+**",
+        ideal="CD8-/IFNG+",
+        distractors=["CD8+/IFNG-", "CD4-/IFNG+"],
+    )
+    assert selected == "CD8-/IFNG+"
+
+
+@pytest.mark.smoke
+def test_mc_selected_fuzzy_rescues_single_char_typo_in_long_option() -> None:
+    """Single-char typo in a long option-name clears the 90+ threshold."""
+    # 'ciproflaxin' vs 'ciprofloxacin' — rapidfuzz.ratio ~83, so this case
+    # *intentionally* does NOT rescue at threshold 90. The guard exists to
+    # avoid false-rescuing between similarly-spelled distractors. This test
+    # documents the threshold's behavior on a real LitQA2 typo.
+    selected = multi_choice_selected(
+        answer_text="The bug evolved resistance to **ciprofloxacin**",
+        ideal="ciproflaxin",  # dataset typo
+        distractors=["meropenem", "gentamicin"],
+    )
+    # No rescue at 90+ — this is the intentional safety floor.
+    assert selected is None
+
+
+@pytest.mark.smoke
+def test_mc_selected_fuzzy_does_not_confuse_distinct_distractors() -> None:
+    """Two distinct distractors must not both qualify as fuzzy matches."""
+    selected = multi_choice_selected(
+        answer_text="The answer is **ciprofloxacin**",
+        ideal="ciprofloxacin",
+        distractors=["ciproflaxin", "ciprofloxin"],  # fake similar-looking distractors
+    )
+    # Exact match should win at tier 1a before fuzzy ever fires.
+    assert selected == "ciprofloxacin"
+
+
 # --------------------------------------------------------------------------- #
 # multi_choice_accuracy — aggregation
 # --------------------------------------------------------------------------- #
@@ -206,6 +337,89 @@ def test_mc_accuracy_counts_correctly() -> None:
     assert metrics["mc_unanswered"] == 1
     assert metrics["mc_accuracy_over_answered"] == pytest.approx(0.5)
     assert metrics["mc_accuracy_over_all"] == pytest.approx(1 / 3)
+
+
+@pytest.mark.smoke
+def test_mc_accuracy_credits_correct_refusal_when_ideal_is_null() -> None:
+    """`ideal='null'` is a refusal-style — empty answer counts as correct."""
+    records = [
+        EvalRecord(
+            question_id="q1",
+            was_refused=True,
+            cited_sentence_ids=frozenset(),
+            answer_text="",  # pipeline refused
+            faithfulness_score=0.0,
+        ),
+        EvalRecord(
+            question_id="q2",
+            was_refused=False,
+            cited_sentence_ids=frozenset(),
+            answer_text="The best answer is **ERK1 & ERK2**.",  # committed to a distractor
+            faithfulness_score=0.5,
+        ),
+    ]
+    gold = {
+        "q1": ("null", ["ERK1", "ERK2", "ERK1 & ERK2"]),
+        "q2": ("null", ["ERK1", "ERK2", "ERK1 & ERK2"]),
+    }
+    metrics = multi_choice_accuracy(records, gold)
+    assert metrics["mc_correct"] == 1  # q1: correctly refused
+    assert metrics["mc_wrong"] == 1    # q2: incorrectly committed
+
+
+@pytest.mark.smoke
+def test_mc_accuracy_credits_insufficient_information_pick() -> None:
+    """Picking 'Insufficient information to answer' is equivalent to refusing."""
+    records = [
+        EvalRecord(
+            question_id="q1",
+            was_refused=False,
+            cited_sentence_ids=frozenset(),
+            answer_text="Insufficient information to answer.",
+            faithfulness_score=0.0,
+        ),
+    ]
+    gold = {"q1": ("Insufficient information to answer", ["X", "Y"])}
+    metrics = multi_choice_accuracy(records, gold)
+    assert metrics["mc_correct"] == 1
+
+
+@pytest.mark.smoke
+def test_mc_accuracy_recognizes_sonnet_style_refusals() -> None:
+    """'The sources do not mention/discuss/address' should count as refusals."""
+    records = [
+        EvalRecord(
+            question_id=f"q{i}",
+            was_refused=False,
+            cited_sentence_ids=frozenset(),
+            answer_text=text,
+            faithfulness_score=0.0,
+        )
+        for i, text in enumerate([
+            "The sources do not mention a PLSCR5 gene or any proteins derived from it.",
+            "The sources do not discuss the topic asked.",
+            "The sources do not address this question.",
+            "The sources do not provide information on this.",
+        ])
+    ]
+    gold = {f"q{i}": ("null", ["A", "B"]) for i in range(4)}
+    metrics = multi_choice_accuracy(records, gold)
+    # All 4 are refusal-style ideals with refusal-style answers → all correct
+    assert metrics["mc_correct"] == 4
+    assert metrics["mc_wrong"] == 0
+
+
+@pytest.mark.smoke
+def test_litqa2_is_refusal_answer_handles_null() -> None:
+    """LitQA2 rows with literal `ideal='null'` should be treated as should_refuse."""
+    from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench
+
+    assert LitQA2Bench._is_refusal_answer("null") is True
+    assert LitQA2Bench._is_refusal_answer("NULL") is True
+    assert LitQA2Bench._is_refusal_answer("Insufficient information to answer") is True
+    # Real answers shouldn't be flagged
+    assert LitQA2Bench._is_refusal_answer("2.7 fold") is False
+    assert LitQA2Bench._is_refusal_answer("nullify (verb)") is False  # exact match only
 
 
 @pytest.mark.smoke

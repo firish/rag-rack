@@ -44,6 +44,10 @@ _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 # "insufficient information to answer" is the LitQA2 multi-choice option
 # that semantically means "refusal" — we treat it as such so abstention
 # metrics aren't muddied by a meaningless attached citation.
+# The "the sources do not <verb>" family covers Sonnet-style refusals that
+# don't use the explicit "I cannot answer" preamble (e.g.
+# "The sources do not mention X").
+# Keep in sync with metrics._answer_is_refusal.
 _REFUSAL_PATTERNS = (
     "i cannot answer",
     "i can't answer",
@@ -51,6 +55,10 @@ _REFUSAL_PATTERNS = (
     "i don't have enough information",
     "the sources do not contain",
     "the provided sources do not",
+    "the sources do not mention",
+    "the sources do not discuss",
+    "the sources do not address",
+    "the sources do not provide",
     "insufficient information to answer",
 )
 
