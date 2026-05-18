@@ -36,7 +36,7 @@ from verifiable_rag.eval.datasets import (
 from verifiable_rag.eval.metrics import multi_choice_accuracy
 from verifiable_rag.eval.reporter import write_markdown
 from verifiable_rag.eval.runners import run_benchmark
-from verifiable_rag.generators import PromptedCitedGenerator
+from verifiable_rag.generators import ConstrainedCitedGenerator, PromptedCitedGenerator
 from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
 from verifiable_rag.models.answer import Strictness
 from verifiable_rag.parsers import (
@@ -66,6 +66,7 @@ def build_baseline_pipeline(
     top_k_retrieve: int = 80,
     top_k_rerank: int = 8,
     index_dir: Path = Path(".verifiable_rag_cache/indexes/eval_lance"),
+    generator_name: str = "prompted",
 ) -> Pipeline:
     """Wire the eval pipeline.
 
@@ -107,6 +108,18 @@ def build_baseline_pipeline(
             f"Unknown reranker {reranker_name!r}; choose 'none', 'bge', or 'cohere'."
         )
 
+    from verifiable_rag.generators import Generator
+
+    generator: Generator
+    if generator_name == "prompted":
+        generator = PromptedCitedGenerator(model=model)
+    elif generator_name == "constrained":
+        generator = ConstrainedCitedGenerator(model=model)
+    else:
+        raise ValueError(
+            f"Unknown generator {generator_name!r}; choose 'prompted' or 'constrained'."
+        )
+
     return Pipeline(
         parser=CachingParser(
             CompositeParser(
@@ -125,7 +138,7 @@ def build_baseline_pipeline(
         ),
         reranker=reranker,
         verifier=verifier,
-        generator=PromptedCitedGenerator(model=model),
+        generator=generator,
         strictness=strictness,
         top_k_retrieve=top_k_retrieve,
         top_k_rerank=top_k_rerank,
@@ -269,6 +282,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "0.3 — empirically loose enough to allow paraphrased citations."
         ),
     )
+    p.add_argument(
+        "--generator",
+        choices=("prompted", "constrained"),
+        default="prompted",
+        help=(
+            "Cited-generator backend. 'prompted' (default) instructs the LLM "
+            "via prompt to cite by sentence ID. 'constrained' uses LiteLLM "
+            "response_format JSON schema with a citation enum drawn from the "
+            "retrieved chunks — eliminates invented IDs and format drift "
+            "(ReClaim, ACL 2024). Requires a model with structured-output "
+            "support: Anthropic Sonnet/Haiku 4.x+, OpenAI GPT-4o family."
+        ),
+    )
     return p.parse_args(argv)
 
 
@@ -314,6 +340,7 @@ def main(argv: list[str] | None = None) -> int:
         strictness=args.strictness,
         top_k_retrieve=args.top_k_retrieve,
         top_k_rerank=args.top_k_rerank,
+        generator_name=args.generator,
         index_dir=args.index_dir,
     )
     rerank_label = {
@@ -332,7 +359,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{args.model} | {embedder_label} | hybrid(BM25+lance) | "
         f"min_tokens={args.min_tokens} | {rerank_label} | "
         f"retrieve={args.top_k_retrieve}/rerank={args.top_k_rerank} | "
-        f"{verifier_label} | {args.strictness}"
+        f"{verifier_label} | {args.strictness} | gen={args.generator}"
     )
 
     report = run_benchmark(
