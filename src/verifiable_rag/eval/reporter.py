@@ -125,7 +125,21 @@ def to_markdown(
             continue
         if record.was_refused:
             lines.append("_Refused._")
+        elif record.cited_sentences:
+            # Per-sentence rendering — preserves citation attribution. Each
+            # CitedSentence becomes one blockquote line with its inline cites
+            # appended in square brackets. Sentences with no cites render
+            # without the trailing bracket.
+            for text, cites in record.cited_sentences:
+                clean = text.strip() or "_(empty)_"
+                if cites:
+                    cite_str = ", ".join(cites)
+                    lines.append(f"> {clean} [{cite_str}]")
+                else:
+                    lines.append(f"> {clean}")
         else:
+            # Backwards-compatible single-blob rendering for old runs
+            # whose EvalRecord didn't preserve cited_sentences.
             lines.append(f"> {record.answer_text or '_(empty)_'}")
         if record.cited_sentence_ids:
             lines.append("")

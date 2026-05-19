@@ -6,7 +6,7 @@ from verifiable_rag.models.answer import CitedSentence
 from verifiable_rag.models.chunk import RetrievedChunk
 from verifiable_rag.models.document import Document
 
-GeneratorMode = Literal["prompted", "constrained", "post_hoc"]
+GeneratorMode = Literal["prompted", "constrained", "safe", "post_hoc"]
 
 
 @runtime_checkable
@@ -38,10 +38,12 @@ class Generator(Protocol):
 # Concrete implementations — imported after Protocol to avoid circular imports
 from verifiable_rag.generators.constrained import ConstrainedCitedGenerator  # noqa: E402
 from verifiable_rag.generators.prompted import PromptedCitedGenerator  # noqa: E402
+from verifiable_rag.generators.safe import SAFECitedGenerator  # noqa: E402
 
 __all__ = [
     "ConstrainedCitedGenerator",
     "Generator",
     "GeneratorMode",
     "PromptedCitedGenerator",
+    "SAFECitedGenerator",
 ]

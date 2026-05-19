@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from verifiable_rag.eval.datasets.alce import ALCEBench, supported_subbenches
 from verifiable_rag.eval.datasets.harry_potter import HarryPotterMicroBench
 from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench, load_litqa2_meta
 
@@ -28,9 +29,11 @@ def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict[st
 
 
 __all__ = [
+    "ALCEBench",
     "HarryPotterMicroBench",
     "LitQA2Bench",
+    "load_halubench",
     "load_litqa2_meta",
     "load_ragtruth",
-    "load_halubench",
+    "supported_subbenches",
 ]

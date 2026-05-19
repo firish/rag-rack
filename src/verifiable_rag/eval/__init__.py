@@ -60,7 +60,15 @@ class Benchmark(Protocol):
 
 @dataclass(frozen=True)
 class EvalRecord:
-    """The pipeline's output for one EvalQuestion, ready to be scored."""
+    """The pipeline's output for one EvalQuestion, ready to be scored.
+
+    ``cited_sentences`` preserves the per-CitedSentence breakdown the Answer
+    object had — each tuple is ``(sentence_text, sorted tuple of citation IDs)``.
+    Defaults to ``()`` for backwards compatibility with pre-2026-05 reports;
+    when present, the reporter renders inline per-sentence cites and post-hoc
+    scoring tools can attribute citations correctly. The union ``cited_sentence_ids``
+    is kept for fast existing metrics that don't need the breakdown.
+    """
 
     question_id: str
     was_refused: bool
@@ -68,6 +76,7 @@ class EvalRecord:
     answer_text: str
     faithfulness_score: float
     error: str | None = None  # set if the pipeline raised
+    cited_sentences: tuple[tuple[str, tuple[str, ...]], ...] = ()  # (text, sorted_cites) pairs
 
 
 @dataclass

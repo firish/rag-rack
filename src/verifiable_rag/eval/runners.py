@@ -274,6 +274,14 @@ def _ask_one(pipeline: Pipeline, question: EvalQuestion) -> EvalRecord:
     for cs in answer.sentences:
         cited.update(cs.supporting_sentence_ids)
 
+    # Preserve the per-sentence cite breakdown so downstream scorers can
+    # attribute citations correctly. Sort cites within each sentence for
+    # determinism (so cached judgments stay stable across re-runs).
+    per_sentence = tuple(
+        (cs.text, tuple(sorted(cs.supporting_sentence_ids)))
+        for cs in answer.sentences
+    )
+
     # An empty answer is functionally a refusal regardless of strictness:
     # the system produced nothing the user can act on. The Pipeline's
     # was_refused flag only fires above the faithfulness threshold, which
@@ -286,4 +294,186 @@ def _ask_one(pipeline: Pipeline, question: EvalQuestion) -> EvalRecord:
         cited_sentence_ids=frozenset(cited),
         answer_text=answer.text,
         faithfulness_score=answer.faithfulness_score,
+        cited_sentences=per_sentence,
     )
+
+
+# --------------------------------------------------------------------------- #
+# ALCE runner — bypasses the shared-corpus model
+# --------------------------------------------------------------------------- #
+
+
+def run_alce_benchmark(
+    pipeline: Pipeline,
+    benchmark,  # type: ignore[no-untyped-def] — ALCEBench, not declared here to avoid circular import
+    pipeline_label: str = "alce-baseline",
+    max_questions: int | None = None,
+    progress: bool = True,
+    delay_between_questions: float = 0.0,
+    max_workers: int = 1,
+) -> EvalReport:
+    """Run an ALCE-style benchmark where each question carries its own passages.
+
+    Bypasses ingestion entirely — the bench provides ``passages_for(qid)`` and
+    we synthesize per-question ``Document`` + ``RetrievedChunk`` objects on the
+    fly. Reranker (if configured) still ranks the question's passages; the
+    generator and verifier are unchanged.
+    """
+    from verifiable_rag.eval.datasets.alce import _passage_sentence_id, passage_doc_id
+    from verifiable_rag.models.chunk import Chunk, RetrievedChunk
+    from verifiable_rag.models.document import Document, Paragraph, Section, Sentence
+    from verifiable_rag.models.span import Span
+
+    def _build_synthetic(qid: str, passages: list) -> tuple[Document, list[RetrievedChunk]]:
+        doc_id = passage_doc_id(qid)
+        char_offset = 0
+        sections: list[Section] = []
+        retrieved: list[RetrievedChunk] = []
+        full_text_parts: list[str] = []
+        for i, p in enumerate(passages):
+            text = (p.get("text") or "").strip()
+            if not text:
+                continue
+            start = char_offset
+            end = start + len(text)
+            span = Span(doc_id=doc_id, char_start=start, char_end=end)
+            sentence_id = _passage_sentence_id(qid, i)
+            sentence = Sentence(id=sentence_id, text=text, span=span)
+            paragraph = Paragraph(
+                id=f"{doc_id}::para{i}", sentences=[sentence], span=span,
+            )
+            section = Section(
+                id=f"{doc_id}::sec{i}",
+                title=p.get("title"),
+                paragraphs=[paragraph],
+                span=span,
+            )
+            sections.append(section)
+            full_text_parts.append(text)
+            chunk = Chunk(
+                chunk_id=f"{doc_id}::chunk{i}",
+                text=text,
+                doc_id=doc_id,
+                sentence_ids=(sentence_id,),
+                span=span,
+                metadata={
+                    "passage_index": i,
+                    "passage_id": str(p.get("id", "")),
+                    "passage_title": p.get("title"),
+                },
+            )
+            # Use ALCE's pre-computed score where present; fall back to a
+            # descending series so first-position passages are preferred.
+            score = float(p.get("score") if p.get("score") is not None else 1.0 - i * 0.001)
+            retrieved.append(
+                RetrievedChunk(chunk=chunk, score=score, retrieval_method="alce_provided")
+            )
+            # +2 gap between passages keeps each sentence's span distinct.
+            char_offset = end + 2
+
+        document = Document(
+            doc_id=doc_id,
+            source_path=Path(f"alce/{qid}"),  # synthetic — not a real file
+            sections=sections,
+            full_text="\n\n".join(full_text_parts),
+            metadata={"alce_qid": qid},
+            parser_name="alce_synthetic",
+        )
+        return document, retrieved
+
+    def _ask_one_alce(q: EvalQuestion) -> EvalRecord:
+        """Run the full ALCE per-question pipeline; catch exceptions as errors."""
+        passages = benchmark.passages_for(q.id)
+        document, retrieved = _build_synthetic(q.id, passages)
+        documents = {document.doc_id: document}
+        try:
+            if pipeline.reranker is not None:
+                reranked = pipeline.reranker.rerank(
+                    q.question, retrieved, top_k=pipeline.top_k_rerank
+                )
+            else:
+                reranked = retrieved[: pipeline.top_k_rerank]
+
+            cited_sentences = pipeline.generator.generate(q.question, reranked, documents)
+
+            verification_results: list = []
+            if pipeline.verifier is not None:
+                verification_results = pipeline.verifier.verify(cited_sentences, documents)
+
+            answer = pipeline._build_answer(  # noqa: SLF001 — internal but stable
+                q.question, cited_sentences, verification_results, reranked
+            )
+
+            cited: set[str] = set()
+            for cs in answer.sentences:
+                cited.update(cs.supporting_sentence_ids)
+            per_sentence = tuple(
+                (cs.text, tuple(sorted(cs.supporting_sentence_ids)))
+                for cs in answer.sentences
+            )
+            refused = answer.was_refused or not answer.sentences
+
+            return EvalRecord(
+                question_id=q.id,
+                was_refused=refused,
+                cited_sentence_ids=frozenset(cited),
+                answer_text=answer.text,
+                faithfulness_score=answer.faithfulness_score,
+                cited_sentences=per_sentence,
+            )
+        except Exception as exc:  # noqa: BLE001
+            return EvalRecord(
+                question_id=q.id,
+                was_refused=False,
+                cited_sentence_ids=frozenset(),
+                answer_text="",
+                faithfulness_score=0.0,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+
+    questions = list(benchmark.questions())
+    if max_questions is not None:
+        questions = questions[:max_questions]
+
+    records: list[EvalRecord] = [None] * len(questions)  # type: ignore[list-item]
+    total = len(questions)
+    print_lock = threading.Lock()
+    counter = {"done": 0}
+
+    if max_workers > 1 and total > 1:
+        if progress:
+            print(f"[alce-parallel] {total} questions with {max_workers} workers", flush=True)
+
+        def _run(idx: int, q: EvalQuestion) -> None:
+            rec = _ask_one_alce(q)
+            with print_lock:
+                counter["done"] += 1
+                if progress:
+                    err = f" ERROR: {rec.error}" if rec.error else ""
+                    print(f"[alce-ask {counter['done']}/{total}] {q.id}{err}", flush=True)
+            records[idx] = rec
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            list(pool.map(lambda iq: _run(iq[0], iq[1]), enumerate(questions)))
+    else:
+        for i, q in enumerate(questions, start=1):
+            if progress:
+                print(f"[alce-ask {i}/{total}] {q.id}: {q.question[:80]}", flush=True)
+            records[i - 1] = _ask_one_alce(q)
+            if delay_between_questions and i < total:
+                time.sleep(delay_between_questions)
+
+    records = [r for r in records if r is not None]  # type: ignore[assignment]
+
+    gold_by_id = {
+        q.id: (q.gold_sentence_ids, q.should_refuse) for q in questions
+    }
+    report = EvalReport(
+        benchmark_name=benchmark.name,
+        pipeline_label=pipeline_label,
+        records=records,
+        discarded_question_ids=[],
+        parsers_by_question_id={q.id: ["alce_synthetic"] for q in questions},
+    )
+    report.metrics = score_records(records, gold_by_id)
+    return report

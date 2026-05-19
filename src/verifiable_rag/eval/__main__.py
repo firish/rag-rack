@@ -29,14 +29,19 @@ from verifiable_rag.chunkers import ParentChildChunker
 from verifiable_rag.embedders import CohereEmbedder, SentenceTransformerEmbedder
 from verifiable_rag.eval import EvalReport
 from verifiable_rag.eval.datasets import (
+    ALCEBench,
     HarryPotterMicroBench,
     LitQA2Bench,
     load_litqa2_meta,
 )
 from verifiable_rag.eval.metrics import multi_choice_accuracy
 from verifiable_rag.eval.reporter import write_markdown
-from verifiable_rag.eval.runners import run_benchmark
-from verifiable_rag.generators import ConstrainedCitedGenerator, PromptedCitedGenerator
+from verifiable_rag.eval.runners import run_alce_benchmark, run_benchmark
+from verifiable_rag.generators import (
+    ConstrainedCitedGenerator,
+    PromptedCitedGenerator,
+    SAFECitedGenerator,
+)
 from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
 from verifiable_rag.models.answer import Strictness
 from verifiable_rag.parsers import (
@@ -52,6 +57,17 @@ from verifiable_rag.verifiers import HHEMVerifier
 _BENCHMARKS = {
     "harry_potter_micro": HarryPotterMicroBench,
     "litqa2": LitQA2Bench,
+    # ALCE sub-benchmarks — bench constructed with the sub-benchmark key as
+    # an argument so all variants share the same adapter class.
+    # ASQA (factoid Q&A with answer ambiguity, GTR/DPR retrieval, Wikipedia)
+    "alce_asqa_oracle": lambda: ALCEBench(subbench="alce_asqa_oracle"),
+    "alce_asqa_gtr": lambda: ALCEBench(subbench="alce_asqa_gtr"),
+    "alce_asqa_dpr": lambda: ALCEBench(subbench="alce_asqa_dpr"),
+    # QAMPARI (multi-hop factoid, entity-set answers, GTR/DPR retrieval, Wikipedia)
+    "alce_qampari_gtr": lambda: ALCEBench(subbench="alce_qampari_gtr"),
+    "alce_qampari_dpr": lambda: ALCEBench(subbench="alce_qampari_dpr"),
+    # ELI5 (long-form Q&A, BM25 retrieval, Sphere/CommonCrawl corpus)
+    "alce_eli5_bm25": lambda: ALCEBench(subbench="alce_eli5_bm25"),
 }
 
 
@@ -115,9 +131,11 @@ def build_baseline_pipeline(
         generator = PromptedCitedGenerator(model=model)
     elif generator_name == "constrained":
         generator = ConstrainedCitedGenerator(model=model)
+    elif generator_name == "safe":
+        generator = SAFECitedGenerator(model=model)
     else:
         raise ValueError(
-            f"Unknown generator {generator_name!r}; choose 'prompted' or 'constrained'."
+            f"Unknown generator {generator_name!r}; choose 'prompted', 'constrained', or 'safe'."
         )
 
     return Pipeline(
@@ -284,15 +302,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument(
         "--generator",
-        choices=("prompted", "constrained"),
+        choices=("prompted", "constrained", "safe"),
         default="prompted",
         help=(
             "Cited-generator backend. 'prompted' (default) instructs the LLM "
             "via prompt to cite by sentence ID. 'constrained' uses LiteLLM "
             "response_format JSON schema with a citation enum drawn from the "
             "retrieved chunks — eliminates invented IDs and format drift "
-            "(ReClaim, ACL 2024). Requires a model with structured-output "
-            "support: Anthropic Sonnet/Haiku 4.x+, OpenAI GPT-4o family."
+            "(ReClaim, ACL 2024). 'safe' extends constrained with per-sentence "
+            "atomic-claim decomposition (SAFE, May 2025) — claims cite at the "
+            "fact level, not the sentence level. Requires a structured-output "
+            "model: Anthropic Sonnet/Haiku 4.x+, OpenAI GPT-4o family."
         ),
     )
     return p.parse_args(argv)
@@ -362,15 +382,27 @@ def main(argv: list[str] | None = None) -> int:
         f"{verifier_label} | {args.strictness} | gen={args.generator}"
     )
 
-    report = run_benchmark(
-        pipeline=pipeline,
-        benchmark=benchmark,
-        pipeline_label=label,
-        max_questions=args.max_questions,
-        delay_between_questions=args.delay,
-        max_workers=args.max_workers,
-        ingest_workers=args.ingest_workers,
-    )
+    if args.benchmark.startswith("alce_"):
+        # ALCE ships per-question pre-retrieved passages, so it uses a
+        # separate runner that bypasses the shared-corpus ingestion model.
+        report = run_alce_benchmark(
+            pipeline=pipeline,
+            benchmark=benchmark,
+            pipeline_label=label,
+            max_questions=args.max_questions,
+            delay_between_questions=args.delay,
+            max_workers=args.max_workers,
+        )
+    else:
+        report = run_benchmark(
+            pipeline=pipeline,
+            benchmark=benchmark,
+            pipeline_label=label,
+            max_questions=args.max_questions,
+            delay_between_questions=args.delay,
+            max_workers=args.max_workers,
+            ingest_workers=args.ingest_workers,
+        )
 
     gold_by_id = {q.id: (q.gold_sentence_ids, q.should_refuse) for q in benchmark.questions()}
 
