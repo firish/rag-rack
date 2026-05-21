@@ -14,8 +14,12 @@ rather than per-benchmark scripts. Each lands under its own subdir of
                  Repo: PatronusAI/HaluBench (~30 MB)
 
   FaithBench   — sentence-level faithfulness labels in summarization,
-                 ~1K examples × 10 LLMs. Newer (NAACL 2025).
-                 Repo: vectara/FaithBench (~5-10 MB)
+                 ~1K examples × 10 LLMs (NAACL 2025). Currently gated on
+                 HF (vectara/FaithBench → 401); skipped here. Re-enable
+                 when an open mirror exists or once we plumb HF auth.
+
+Note: files land under ``CACHE_ROOT/<subdir>/`` (not the global HF cache)
+so loaders can read them by a stable, repo-relative path.
 """
 from __future__ import annotations
 
@@ -30,7 +34,7 @@ BENCHES: tuple[tuple[str, str, str], ...] = (
     # (cache_subdir, hf_repo_id, repo_type)
     ("ragtruth", "wandb/RAGTruth-processed", "dataset"),
     ("halubench", "PatronusAI/HaluBench", "dataset"),
-    ("faithbench", "vectara/FaithBench", "dataset"),
+    # ("faithbench", "vectara/FaithBench", "dataset"),  # gated, see module docstring
 )
 
 
@@ -47,7 +51,12 @@ def _fetch_repo(subdir: str, repo_id: str, repo_type: str) -> Path:
     keep = [f for f in files if not f.startswith(".") and f != "README.md"]
     for fname in keep:
         try:
-            local = hf_hub_download(repo_id=repo_id, filename=fname, repo_type=repo_type)
+            local = hf_hub_download(
+                repo_id=repo_id,
+                filename=fname,
+                repo_type=repo_type,
+                local_dir=target_dir,
+            )
         except Exception as exc:  # noqa: BLE001
             print(f"  {fname}: FAILED ({type(exc).__name__}: {exc})", flush=True)
             continue
@@ -61,7 +70,7 @@ def main() -> int:
     for subdir, repo, repo_type in BENCHES:
         _fetch_repo(subdir, repo, repo_type)
     print()
-    print(f"[done] all three faithfulness benches cached under {CACHE_ROOT}/")
+    print(f"[done] faithfulness benches cached under {CACHE_ROOT}/")
     return 0
 
 

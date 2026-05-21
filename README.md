@@ -58,8 +58,22 @@ answer = pipeline.ask("What did the authors find?")
 ```bash
 pip install verifiable-rag                          # core (no heavy deps)
 pip install "verifiable-rag[docling,bge,lancedb]"   # with parser + embedder + index
+pip install "verifiable-rag[hhem,minicheck]"        # NLI verifiers (adds torch + transformers)
+pip install "verifiable-rag[litellm]"               # LLM-judge verifier
 pip install "verifiable-rag[all]"                   # everything
 ```
+
+### First-run model downloads
+
+Verifier model weights are **not bundled** in the wheel — they're downloaded lazily from HuggingFace Hub on first use, then cached in `~/.cache/huggingface/hub/`. Expect a one-time download per verifier:
+
+| Verifier | Model | Size |
+|---|---|---|
+| `HHEMVerifier` | `vectara/hallucination_evaluation_model` | ~600 MB |
+| `MiniCheckVerifier` | `lytang/MiniCheck-Flan-T5-Large` | ~770 MB |
+| `LLMJudgeVerifier` | (none — calls a hosted API) | 0 |
+
+After the first call the model is cached forever. Standard `transformers` progress bar is shown during download.
 
 ## Roadmap
 

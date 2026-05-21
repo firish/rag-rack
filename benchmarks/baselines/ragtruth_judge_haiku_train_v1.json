@@ -1,0 +1,139 @@
+{
+  "scorer_label": "llm-judge::claude-haiku-4-5-20251001",
+  "aggregation": "min",
+  "wall_secs": 397.2934262752533,
+  "metrics": {
+    "n": 300.0,
+    "n_scored": 300.0,
+    "n_errors": 0.0,
+    "n_hallucinated": 135.0,
+    "base_rate": 0.45,
+    "auroc": 0.7292704826038159,
+    "auprc": 0.6035994186488599,
+    "f1_best": 0.7333333333333333,
+    "precision_best": 0.6205128205128205,
+    "recall_best": 0.8962962962962963,
+    "threshold_best": 0.95
+  },
+  "by_task": {
+    "Data2txt": {
+      "n": 100.0,
+      "n_scored": 100.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 70.0,
+      "base_rate": 0.7,
+      "auroc": 0.7135714285714286,
+      "auprc": 0.7975507327666796,
+      "f1_best": 0.8707482993197279,
+      "precision_best": 0.8311688311688312,
+      "recall_best": 0.9142857142857143,
+      "threshold_best": 0.95
+    },
+    "QA": {
+      "n": 100.0,
+      "n_scored": 100.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 31.0,
+      "base_rate": 0.31,
+      "auroc": 0.6619915848527349,
+      "auprc": 0.40688908528501994,
+      "f1_best": 0.5625,
+      "precision_best": 0.4153846153846154,
+      "recall_best": 0.8709677419354839,
+      "threshold_best": 0.95
+    },
+    "Summary": {
+      "n": 100.0,
+      "n_scored": 100.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 34.0,
+      "base_rate": 0.34,
+      "auroc": 0.7611408199643493,
+      "auprc": 0.5339261626276055,
+      "f1_best": 0.6896551724137931,
+      "precision_best": 0.5660377358490566,
+      "recall_best": 0.8823529411764706,
+      "threshold_best": 0.95
+    }
+  },
+  "by_model": {
+    "gpt-3.5-turbo-0613": {
+      "n": 44.0,
+      "n_scored": 44.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 7.0,
+      "base_rate": 0.1590909090909091,
+      "auroc": 0.5521235521235521,
+      "auprc": 0.17792207792207793,
+      "f1_best": 0.3125,
+      "precision_best": 0.2,
+      "recall_best": 0.7142857142857143,
+      "threshold_best": 0.15000000000000002
+    },
+    "gpt-4-0613": {
+      "n": 56.0,
+      "n_scored": 56.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 9.0,
+      "base_rate": 0.16071428571428573,
+      "auroc": 0.6997635933806146,
+      "auprc": 0.31734360410831,
+      "f1_best": 0.4,
+      "precision_best": 0.2857142857142857,
+      "recall_best": 0.6666666666666666,
+      "threshold_best": 0.07999999999999996
+    },
+    "llama-2-13b-chat": {
+      "n": 55.0,
+      "n_scored": 55.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 32.0,
+      "base_rate": 0.5818181818181818,
+      "auroc": 0.6514945652173914,
+      "auprc": 0.667776828407304,
+      "f1_best": 0.7848101265822784,
+      "precision_best": 0.6595744680851063,
+      "recall_best": 0.96875,
+      "threshold_best": 0.95
+    },
+    "llama-2-70b-chat": {
+      "n": 51.0,
+      "n_scored": 51.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 25.0,
+      "base_rate": 0.49019607843137253,
+      "auroc": 0.7815384615384615,
+      "auprc": 0.6941176470588236,
+      "f1_best": 0.8135593220338982,
+      "precision_best": 0.7058823529411765,
+      "recall_best": 0.96,
+      "threshold_best": 0.95
+    },
+    "llama-2-7b-chat": {
+      "n": 42.0,
+      "n_scored": 42.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 26.0,
+      "base_rate": 0.6190476190476191,
+      "auroc": 0.6442307692307693,
+      "auprc": 0.697954822954823,
+      "f1_best": 0.8135593220338984,
+      "precision_best": 0.7272727272727273,
+      "recall_best": 0.9230769230769231,
+      "threshold_best": 0.95
+    },
+    "mistral-7B-instruct": {
+      "n": 52.0,
+      "n_scored": 52.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 36.0,
+      "base_rate": 0.6923076923076923,
+      "auroc": 0.704861111111111,
+      "auprc": 0.8030405584753411,
+      "f1_best": 0.8461538461538461,
+      "precision_best": 0.7857142857142857,
+      "recall_best": 0.9166666666666666,
+      "threshold_best": 0.95
+    }
+  }
+}

@@ -115,6 +115,33 @@ class HHEMVerifier:
         return results
 
     # ------------------------------------------------------------------ #
+    # NLIScorer Protocol — raw (premise, hypothesis) scoring
+    # ------------------------------------------------------------------ #
+
+    def score_pairs(self, pairs: list[tuple[str, str]]) -> list[float]:
+        """Score a batch of ``(premise, hypothesis)`` pairs.
+
+        Used by verifier-only runners (e.g. RAGTruth) that bypass the
+        CitedSentence/Document path. Empty premise OR empty hypothesis
+        scores 0.0; everything else goes through HHEM in one batch call.
+        """
+        if not pairs:
+            return []
+        keep_idx: list[int] = []
+        keep_pairs: list[tuple[str, str]] = []
+        for i, (p, h) in enumerate(pairs):
+            if p.strip() and h.strip():
+                keep_idx.append(i)
+                keep_pairs.append((p, h))
+
+        scores = [0.0] * len(pairs)
+        if keep_pairs:
+            raw = self._load().predict(keep_pairs)
+            for i, s in zip(keep_idx, raw, strict=True):
+                scores[i] = float(s)
+        return scores
+
+    # ------------------------------------------------------------------ #
     # Internals
     # ------------------------------------------------------------------ #
 

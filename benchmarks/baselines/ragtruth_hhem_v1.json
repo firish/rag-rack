@@ -1,0 +1,139 @@
+{
+  "scorer_label": "hhem-2.1-open (modal-T4)",
+  "aggregation": "min",
+  "wall_secs": 2545.8197231292725,
+  "metrics": {
+    "n": 2700.0,
+    "n_scored": 2700.0,
+    "n_errors": 0.0,
+    "n_hallucinated": 943.0,
+    "base_rate": 0.34925925925925927,
+    "auroc": 0.8132249067659072,
+    "auprc": 0.6801266721402977,
+    "f1_best": 0.6758805171645118,
+    "precision_best": 0.583076923076923,
+    "recall_best": 0.8038176033934252,
+    "threshold_best": 0.7666114568710327
+  },
+  "by_task": {
+    "Data2txt": {
+      "n": 900.0,
+      "n_scored": 900.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 579.0,
+      "base_rate": 0.6433333333333333,
+      "auroc": 0.5658967281648992,
+      "auprc": 0.710271733438125,
+      "f1_best": 0.7858117326057298,
+      "precision_best": 0.649379932356257,
+      "recall_best": 0.9948186528497409,
+      "threshold_best": 0.4444962739944458
+    },
+    "QA": {
+      "n": 900.0,
+      "n_scored": 900.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 160.0,
+      "base_rate": 0.17777777777777778,
+      "auroc": 0.8741891891891891,
+      "auprc": 0.6765078514542577,
+      "f1_best": 0.6540880503144655,
+      "precision_best": 0.6582278481012658,
+      "recall_best": 0.65,
+      "threshold_best": 0.9171753525733948
+    },
+    "Summary": {
+      "n": 900.0,
+      "n_scored": 900.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 204.0,
+      "base_rate": 0.22666666666666666,
+      "auroc": 0.7593566880775299,
+      "auprc": 0.5447994160159508,
+      "f1_best": 0.5043859649122807,
+      "precision_best": 0.45634920634920634,
+      "recall_best": 0.5637254901960784,
+      "threshold_best": 0.7675642669200897
+    }
+  },
+  "by_model": {
+    "gpt-3.5-turbo-0613": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 46.0,
+      "base_rate": 0.10222222222222223,
+      "auroc": 0.8251721911321567,
+      "auprc": 0.24969260623514594,
+      "f1_best": 0.4246575342465754,
+      "precision_best": 0.31,
+      "recall_best": 0.6739130434782609,
+      "threshold_best": 0.9354617297649384
+    },
+    "gpt-4-0613": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 42.0,
+      "base_rate": 0.09333333333333334,
+      "auroc": 0.8419701213818861,
+      "auprc": 0.30333140272083053,
+      "f1_best": 0.4736842105263159,
+      "precision_best": 0.375,
+      "recall_best": 0.6428571428571429,
+      "threshold_best": 0.9429014436900616
+    },
+    "llama-2-13b-chat": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 207.0,
+      "base_rate": 0.46,
+      "auroc": 0.8151925409037593,
+      "auprc": 0.803197265918814,
+      "f1_best": 0.7468354430379747,
+      "precision_best": 0.6629213483146067,
+      "recall_best": 0.855072463768116,
+      "threshold_best": 0.8171775490045547
+    },
+    "llama-2-70b-chat": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 171.0,
+      "base_rate": 0.38,
+      "auroc": 0.8060324047873566,
+      "auprc": 0.7017884522654214,
+      "f1_best": 0.7038834951456311,
+      "precision_best": 0.6016597510373444,
+      "recall_best": 0.847953216374269,
+      "threshold_best": 0.6410873234272003
+    },
+    "llama-2-7b-chat": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 226.0,
+      "base_rate": 0.5022222222222222,
+      "auroc": 0.7656250000000001,
+      "auprc": 0.7529094058850796,
+      "f1_best": 0.7307692307692307,
+      "precision_best": 0.6462585034013606,
+      "recall_best": 0.8407079646017699,
+      "threshold_best": 0.6952602863311768
+    },
+    "mistral-7B-instruct": {
+      "n": 450.0,
+      "n_scored": 450.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 251.0,
+      "base_rate": 0.5577777777777778,
+      "auroc": 0.8626599131113736,
+      "auprc": 0.8830232067806731,
+      "f1_best": 0.8186915887850468,
+      "precision_best": 0.7711267605633803,
+      "recall_best": 0.8725099601593626,
+      "threshold_best": 0.4729529619216919
+    }
+  }
+}

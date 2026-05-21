@@ -1,0 +1,139 @@
+{
+  "scorer_label": "llm-judge::claude-haiku-4-5-20251001",
+  "aggregation": "min",
+  "wall_secs": 901.1566941738129,
+  "metrics": {
+    "n": 600.0,
+    "n_scored": 600.0,
+    "n_errors": 0.0,
+    "n_hallucinated": 205.0,
+    "base_rate": 0.3416666666666667,
+    "auroc": 0.7282185859833281,
+    "auprc": 0.49356368493600256,
+    "f1_best": 0.6598290598290598,
+    "precision_best": 0.5078947368421053,
+    "recall_best": 0.9414634146341463,
+    "threshold_best": 0.85
+  },
+  "by_task": {
+    "Data2txt": {
+      "n": 200.0,
+      "n_scored": 200.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 131.0,
+      "base_rate": 0.655,
+      "auroc": 0.7664564664232769,
+      "auprc": 0.8075672354377345,
+      "f1_best": 0.8714285714285714,
+      "precision_best": 0.8187919463087249,
+      "recall_best": 0.9312977099236641,
+      "threshold_best": 0.85
+    },
+    "QA": {
+      "n": 200.0,
+      "n_scored": 200.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 26.0,
+      "base_rate": 0.13,
+      "auroc": 0.6990495137046862,
+      "auprc": 0.19884406079420744,
+      "f1_best": 0.34210526315789475,
+      "precision_best": 0.20634920634920634,
+      "recall_best": 1.0,
+      "threshold_best": 0.28
+    },
+    "Summary": {
+      "n": 200.0,
+      "n_scored": 200.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 48.0,
+      "base_rate": 0.24,
+      "auroc": 0.7558251096491229,
+      "auprc": 0.4048123512566243,
+      "f1_best": 0.5935483870967743,
+      "precision_best": 0.42990654205607476,
+      "recall_best": 0.9583333333333334,
+      "threshold_best": 0.85
+    }
+  },
+  "by_model": {
+    "gpt-3.5-turbo-0613": {
+      "n": 87.0,
+      "n_scored": 87.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 12.0,
+      "base_rate": 0.13793103448275862,
+      "auroc": 0.7533333333333334,
+      "auprc": 0.3038530601720416,
+      "f1_best": 0.5,
+      "precision_best": 0.375,
+      "recall_best": 0.75,
+      "threshold_best": 0.85
+    },
+    "gpt-4-0613": {
+      "n": 111.0,
+      "n_scored": 111.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 12.0,
+      "base_rate": 0.10810810810810811,
+      "auroc": 0.7095959595959596,
+      "auprc": 0.4011056511056511,
+      "f1_best": 0.4117647058823529,
+      "precision_best": 0.3181818181818182,
+      "recall_best": 0.5833333333333334,
+      "threshold_best": 0.95
+    },
+    "llama-2-13b-chat": {
+      "n": 96.0,
+      "n_scored": 96.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 36.0,
+      "base_rate": 0.375,
+      "auroc": 0.5125,
+      "auprc": 0.39028213166144204,
+      "f1_best": 0.5853658536585366,
+      "precision_best": 0.41379310344827586,
+      "recall_best": 1.0,
+      "threshold_best": 0.95
+    },
+    "llama-2-70b-chat": {
+      "n": 81.0,
+      "n_scored": 81.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 33.0,
+      "base_rate": 0.4074074074074074,
+      "auroc": 0.7140151515151516,
+      "auprc": 0.5481437088942159,
+      "f1_best": 0.7032967032967034,
+      "precision_best": 0.5517241379310345,
+      "recall_best": 0.9696969696969697,
+      "threshold_best": 0.95
+    },
+    "llama-2-7b-chat": {
+      "n": 135.0,
+      "n_scored": 135.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 60.0,
+      "base_rate": 0.4444444444444444,
+      "auroc": 0.5991111111111111,
+      "auprc": 0.4967634619808533,
+      "f1_best": 0.6666666666666665,
+      "precision_best": 0.5042735042735043,
+      "recall_best": 0.9833333333333333,
+      "threshold_best": 0.85
+    },
+    "mistral-7B-instruct": {
+      "n": 90.0,
+      "n_scored": 90.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 52.0,
+      "base_rate": 0.5777777777777777,
+      "auroc": 0.7512651821862348,
+      "auprc": 0.7341605591315616,
+      "f1_best": 0.8333333333333333,
+      "precision_best": 0.7352941176470589,
+      "recall_best": 0.9615384615384616,
+      "threshold_best": 0.95
+    }
+  }
+}

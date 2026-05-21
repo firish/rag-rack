@@ -5,8 +5,10 @@ Currently shipping:
     PDF (tests/parsers/fixtures/sample.pdf).
   - LitQA2Bench: 199 multi-choice scientific-paper questions from the
     LAB-Bench dataset on HuggingFace.
+  - ALCEBench: Princeton's citation-quality benchmark (ASQA/QAMPARI/ELI5).
+  - RAGTruthBench: word-span hallucination annotations (verifier benchmark).
 
-Planned: RAGTruth (faithfulness calibration), HaluBench (hallucination).
+Planned: HaluBench (binary hallucination), FaithBench (gated on HF).
 """
 
 from __future__ import annotations
@@ -16,11 +18,11 @@ from typing import Any
 from verifiable_rag.eval.datasets.alce import ALCEBench, supported_subbenches
 from verifiable_rag.eval.datasets.harry_potter import HarryPotterMicroBench
 from verifiable_rag.eval.datasets.litqa2 import LitQA2Bench, load_litqa2_meta
-
-
-def load_ragtruth(cache_dir: str = "benchmarks/data/ragtruth") -> list[dict[str, Any]]:
-    """Load RAGTruth benchmark. Stub — implement when needed for verifier calibration."""
-    raise NotImplementedError("RAGTruth loader not yet implemented")
+from verifiable_rag.eval.datasets.ragtruth import (
+    HallucinationSpan,
+    RAGTruthBench,
+    RAGTruthExample,
+)
 
 
 def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict[str, Any]]:
@@ -30,10 +32,12 @@ def load_halubench(cache_dir: str = "benchmarks/data/halubench") -> list[dict[st
 
 __all__ = [
     "ALCEBench",
+    "HallucinationSpan",
     "HarryPotterMicroBench",
     "LitQA2Bench",
+    "RAGTruthBench",
+    "RAGTruthExample",
     "load_halubench",
     "load_litqa2_meta",
-    "load_ragtruth",
     "supported_subbenches",
 ]

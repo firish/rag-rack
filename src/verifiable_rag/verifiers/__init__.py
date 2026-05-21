@@ -27,7 +27,40 @@ class Verifier(Protocol):
         ...
 
 
+@runtime_checkable
+class NLIScorer(Protocol):
+    """Raw (premise, hypothesis) → entailment-probability scoring.
+
+    A thinner interface than :class:`Verifier`. Used by verifier-only
+    benchmarks (e.g. RAGTruth) that have pre-generated responses and just
+    need the underlying NLI signal, not the CitedSentence/Document
+    ceremony. Future verifiers (MiniCheck, DualNLI, LLM-judge) will all
+    expose this too so the same runner scores them apples-to-apples.
+    """
+
+    def score_pairs(self, pairs: list[tuple[str, str]]) -> list[float]:
+        """Score a batch of (premise, hypothesis) pairs.
+
+        Returns one float in ``[0, 1]`` per pair (higher = more supported).
+        """
+        ...
+
+
 # Concrete implementations — imported after Protocol to avoid circular imports
 from verifiable_rag.verifiers.hhem import HHEMVerifier  # noqa: E402
+from verifiable_rag.verifiers.llm_judge import LLMJudgeVerifier  # noqa: E402
+from verifiable_rag.verifiers.minicheck import MiniCheckVerifier  # noqa: E402
+from verifiable_rag.verifiers.modal_remote import (  # noqa: E402
+    ModalHHEMScorer,
+    ModalMiniCheckScorer,
+)
 
-__all__ = ["Verifier", "HHEMVerifier"]
+__all__ = [
+    "HHEMVerifier",
+    "LLMJudgeVerifier",
+    "MiniCheckVerifier",
+    "ModalHHEMScorer",
+    "ModalMiniCheckScorer",
+    "NLIScorer",
+    "Verifier",
+]

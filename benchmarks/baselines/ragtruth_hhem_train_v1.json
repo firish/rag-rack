@@ -1,0 +1,139 @@
+{
+  "scorer_label": "hhem-2.1-open (modal-T4)",
+  "aggregation": "min",
+  "wall_secs": 1391.0146329402924,
+  "metrics": {
+    "n": 1500.0,
+    "n_scored": 1500.0,
+    "n_errors": 0.0,
+    "n_hallucinated": 691.0,
+    "base_rate": 0.46066666666666667,
+    "auroc": 0.7949067920768347,
+    "auprc": 0.7417558703186254,
+    "f1_best": 0.7358834244080146,
+    "precision_best": 0.6338912133891214,
+    "recall_best": 0.8769898697539797,
+    "threshold_best": 0.5669094920158386
+  },
+  "by_task": {
+    "Data2txt": {
+      "n": 500.0,
+      "n_scored": 500.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 362.0,
+      "base_rate": 0.724,
+      "auroc": 0.5939827047802066,
+      "auprc": 0.7927752934769124,
+      "f1_best": 0.839907192575406,
+      "precision_best": 0.724,
+      "recall_best": 1.0,
+      "threshold_best": 0.13472813367843628
+    },
+    "QA": {
+      "n": 500.0,
+      "n_scored": 500.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 161.0,
+      "base_rate": 0.322,
+      "auroc": 0.8404331336228219,
+      "auprc": 0.7165719809965794,
+      "f1_best": 0.6666666666666666,
+      "precision_best": 0.650887573964497,
+      "recall_best": 0.6832298136645962,
+      "threshold_best": 0.8665376603603363
+    },
+    "Summary": {
+      "n": 500.0,
+      "n_scored": 500.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 168.0,
+      "base_rate": 0.336,
+      "auroc": 0.754948364888124,
+      "auprc": 0.6232922946311091,
+      "f1_best": 0.6114942528735632,
+      "precision_best": 0.49812734082397003,
+      "recall_best": 0.7916666666666666,
+      "threshold_best": 0.3389955163002014
+    }
+  },
+  "by_model": {
+    "gpt-3.5-turbo-0613": {
+      "n": 217.0,
+      "n_scored": 217.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 38.0,
+      "base_rate": 0.17511520737327188,
+      "auroc": 0.704792708027051,
+      "auprc": 0.270157801791323,
+      "f1_best": 0.47457627118644063,
+      "precision_best": 0.35,
+      "recall_best": 0.7368421052631579,
+      "threshold_best": 0.6897366642951965
+    },
+    "gpt-4-0613": {
+      "n": 252.0,
+      "n_scored": 252.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 36.0,
+      "base_rate": 0.14285714285714285,
+      "auroc": 0.7821502057613169,
+      "auprc": 0.3436453137692829,
+      "f1_best": 0.45652173913043476,
+      "precision_best": 0.375,
+      "recall_best": 0.5833333333333334,
+      "threshold_best": 0.9097828716039658
+    },
+    "llama-2-13b-chat": {
+      "n": 253.0,
+      "n_scored": 253.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 145.0,
+      "base_rate": 0.5731225296442688,
+      "auroc": 0.7054916985951468,
+      "auprc": 0.7616773220714534,
+      "f1_best": 0.7580174927113703,
+      "precision_best": 0.6565656565656566,
+      "recall_best": 0.896551724137931,
+      "threshold_best": 0.7397486865520477
+    },
+    "llama-2-70b-chat": {
+      "n": 248.0,
+      "n_scored": 248.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 119.0,
+      "base_rate": 0.4798387096774194,
+      "auroc": 0.8769461272881246,
+      "auprc": 0.8405221747637907,
+      "f1_best": 0.8340425531914895,
+      "precision_best": 0.8448275862068966,
+      "recall_best": 0.8235294117647058,
+      "threshold_best": 0.8620720207691193
+    },
+    "llama-2-7b-chat": {
+      "n": 266.0,
+      "n_scored": 266.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 170.0,
+      "base_rate": 0.6390977443609023,
+      "auroc": 0.7039215686274509,
+      "auprc": 0.7887035863650342,
+      "f1_best": 0.8021390374331552,
+      "precision_best": 0.7352941176470589,
+      "recall_best": 0.8823529411764706,
+      "threshold_best": 0.5669094920158386
+    },
+    "mistral-7B-instruct": {
+      "n": 264.0,
+      "n_scored": 264.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 183.0,
+      "base_rate": 0.6931818181818182,
+      "auroc": 0.8616339472441477,
+      "auprc": 0.9322932518976399,
+      "f1_best": 0.8762886597938144,
+      "precision_best": 0.8292682926829268,
+      "recall_best": 0.9289617486338798,
+      "threshold_best": 0.3535090684890747
+    }
+  }
+}

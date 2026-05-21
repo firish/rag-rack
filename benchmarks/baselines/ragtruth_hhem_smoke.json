@@ -1,0 +1,89 @@
+{
+  "scorer_label": "hhem-2.1-open",
+  "aggregation": "min",
+  "wall_secs": 192.1433618068695,
+  "metrics": {
+    "n": 20.0,
+    "n_scored": 20.0,
+    "n_errors": 0.0,
+    "n_hallucinated": 5.0,
+    "base_rate": 0.25,
+    "auroc": 0.68,
+    "auprc": 0.3925,
+    "f1_best": 0.6153846153846154,
+    "precision_best": 0.5,
+    "recall_best": 0.8,
+    "threshold_best": 0.21067404747009277
+  },
+  "by_task": {
+    "Summary": {
+      "n": 20.0,
+      "n_scored": 20.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 5.0,
+      "base_rate": 0.25,
+      "auroc": 0.68,
+      "auprc": 0.3925,
+      "f1_best": 0.6153846153846154,
+      "precision_best": 0.5,
+      "recall_best": 0.8,
+      "threshold_best": 0.21067404747009277
+    }
+  },
+  "by_model": {
+    "gpt-3.5-turbo-0613": {
+      "n": 4.0,
+      "n_scored": 4.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 0.0,
+      "base_rate": 0.0
+    },
+    "gpt-4-0613": {
+      "n": 4.0,
+      "n_scored": 4.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 0.0,
+      "base_rate": 0.0
+    },
+    "llama-2-13b-chat": {
+      "n": 3.0,
+      "n_scored": 3.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 3.0,
+      "base_rate": 1.0
+    },
+    "llama-2-70b-chat": {
+      "n": 3.0,
+      "n_scored": 3.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 1.0,
+      "base_rate": 0.3333333333333333,
+      "auroc": 0.0,
+      "auprc": 0.3333333333333333,
+      "f1_best": 0.5,
+      "precision_best": 0.3333333333333333,
+      "recall_best": 1.0,
+      "threshold_best": 0.04007279872894287
+    },
+    "llama-2-7b-chat": {
+      "n": 3.0,
+      "n_scored": 3.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 0.0,
+      "base_rate": 0.0
+    },
+    "mistral-7B-instruct": {
+      "n": 3.0,
+      "n_scored": 3.0,
+      "n_errors": 0.0,
+      "n_hallucinated": 1.0,
+      "base_rate": 0.3333333333333333,
+      "auroc": 0.5,
+      "auprc": 0.5,
+      "f1_best": 0.6666666666666666,
+      "precision_best": 0.5,
+      "recall_best": 1.0,
+      "threshold_best": 0.319461464881897
+    }
+  }
+}
