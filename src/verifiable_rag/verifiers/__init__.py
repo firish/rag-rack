@@ -47,6 +47,8 @@ class NLIScorer(Protocol):
 
 
 # Concrete implementations — imported after Protocol to avoid circular imports
+from verifiable_rag.verifiers.dual_nli import DualNLIVerifier  # noqa: E402
+from verifiable_rag.verifiers.ensemble import EnsembleScorer  # noqa: E402
 from verifiable_rag.verifiers.hhem import HHEMVerifier  # noqa: E402
 from verifiable_rag.verifiers.llm_judge import LLMJudgeVerifier  # noqa: E402
 from verifiable_rag.verifiers.minicheck import MiniCheckVerifier  # noqa: E402
@@ -56,6 +58,8 @@ from verifiable_rag.verifiers.modal_remote import (  # noqa: E402
 )
 
 __all__ = [
+    "DualNLIVerifier",
+    "EnsembleScorer",
     "HHEMVerifier",
     "LLMJudgeVerifier",
     "MiniCheckVerifier",

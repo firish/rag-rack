@@ -117,7 +117,10 @@ def test_score_pairs_with_scripted_judgments() -> None:
 def test_score_pairs_recovers_from_per_call_errors() -> None:
     """If one LLM call raises, that pair scores 0 and the batch continues."""
     def _completion(**kwargs: object) -> MagicMock:
-        user_text = kwargs["messages"][1]["content"]
+        # User message is now a list of content blocks (premise + claim)
+        # because of prompt-cache breakpoints. Walk the blocks for our marker.
+        user_blocks = kwargs["messages"][1]["content"]
+        user_text = " ".join(block.get("text", "") for block in user_blocks)
         if "boom" in user_text:
             raise RuntimeError("simulated provider error")
         return _fake_completion_returning('{"supported": true, "confidence": 0.85}')
