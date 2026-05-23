@@ -83,6 +83,8 @@ def build_baseline_pipeline(
     top_k_rerank: int = 8,
     index_dir: Path = Path(".verifiable_rag_cache/indexes/eval_lance"),
     generator_name: str = "prompted",
+    contextual: str = "none",
+    contextual_model: str = "claude-haiku-4-5-20251001",
 ) -> Pipeline:
     """Wire the eval pipeline.
 
@@ -138,6 +140,33 @@ def build_baseline_pipeline(
             f"Unknown generator {generator_name!r}; choose 'prompted', 'constrained', or 'safe'."
         )
 
+    base_chunker = ParentChildChunker(
+        max_child_tokens=400,
+        min_child_tokens=min_child_tokens,
+    )
+    chunker: object
+    if contextual == "none":
+        chunker = base_chunker
+    elif contextual in {"section", "paragraph", "chunk"}:
+        from verifiable_rag.chunkers import ContextualChunker, LLMContextualizer
+
+        chunker = ContextualChunker(
+            base=base_chunker,
+            # Conservative defaults: max_workers=3 + num_retries=5 to dodge
+            # Anthropic 529 overload bursts seen on sustained loads. Tunable
+            # via dedicated flags later.
+            contextualizer=LLMContextualizer(
+                model=contextual_model,
+                max_workers=3,
+                num_retries=5,
+            ),
+            granularity=contextual,  # type: ignore[arg-type]
+        )
+    else:
+        raise ValueError(
+            f"Unknown --contextual {contextual!r}; choose 'none', 'section', 'paragraph', or 'chunk'."
+        )
+
     return Pipeline(
         parser=CachingParser(
             CompositeParser(
@@ -145,10 +174,7 @@ def build_baseline_pipeline(
                 fallbacks=[PyMuPDFParser()],
             )
         ),
-        chunker=ParentChildChunker(
-            max_child_tokens=400,
-            min_child_tokens=min_child_tokens,
-        ),
+        chunker=chunker,
         embedder=embedder,
         indexer=HybridIndex(
             dense=LanceDBIndex(uri=index_dir),
@@ -315,6 +341,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "model: Anthropic Sonnet/Haiku 4.x+, OpenAI GPT-4o family."
         ),
     )
+    p.add_argument(
+        "--contextual",
+        choices=("none", "section", "paragraph", "chunk"),
+        default="none",
+        help=(
+            "Contextual Retrieval (Anthropic 2024): prepend an LLM-written "
+            "context preamble to each chunk before embedding. 'none' (default) "
+            "uses the base chunker unchanged. 'section'/'paragraph'/'chunk' "
+            "control granularity — section is cheapest (one preamble per "
+            "Section, shared across all chunks under it), chunk is Anthropic's "
+            "original recipe (one preamble per chunk). Requires an Anthropic "
+            "API key. Re-ingests required when switched on/off — use a "
+            "different --index-dir to keep both indexes."
+        ),
+    )
+    p.add_argument(
+        "--contextual-model",
+        default="claude-haiku-4-5-20251001",
+        help="LiteLLM model id for the contextualizer LLM. Default Haiku 4.5.",
+    )
     return p.parse_args(argv)
 
 
@@ -362,6 +408,8 @@ def main(argv: list[str] | None = None) -> int:
         top_k_rerank=args.top_k_rerank,
         generator_name=args.generator,
         index_dir=args.index_dir,
+        contextual=args.contextual,
+        contextual_model=args.contextual_model,
     )
     rerank_label = {
         "none": "no-reranker",

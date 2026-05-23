@@ -73,7 +73,11 @@ class Pipeline:
         p = Path(path)
         document = self.parser.parse(p)
         chunks = self.chunker.chunk(document)
-        embeddings = self.embedder.embed([c.text for c in chunks])
+        # Use contextual preamble if the chunker added one
+        # (Contextual Retrieval recipe). Falls back to chunk.text otherwise.
+        from verifiable_rag.chunkers.contextual import embedding_text
+
+        embeddings = self.embedder.embed([embedding_text(c) for c in chunks])
         return document, chunks, embeddings
 
     def commit_ingest(

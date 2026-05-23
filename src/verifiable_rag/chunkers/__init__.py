@@ -2,6 +2,11 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from verifiable_rag.chunkers.contextual import (
+    ContextualChunker,
+    LLMContextualizer,
+    embedding_text,
+)
 from verifiable_rag.chunkers.parent_child import ParentChildChunker
 from verifiable_rag.chunkers.parent_expander import ParentExpander
 from verifiable_rag.models.chunk import Chunk
@@ -22,4 +27,12 @@ class Chunker(Protocol):
         ...
 
 
-__all__ = ["Chunk", "Chunker", "ParentChildChunker", "ParentExpander"]
+__all__ = [
+    "Chunk",
+    "Chunker",
+    "ContextualChunker",
+    "LLMContextualizer",
+    "ParentChildChunker",
+    "ParentExpander",
+    "embedding_text",
+]
