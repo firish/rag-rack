@@ -4,21 +4,23 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-rag"
-version = "0.1.0"
+version = "0.5.0"
 description = "Document-grounded Q&A with sentence-level citations and faithfulness verification"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 authors = [{ name = "Rishi Gulati", email = "gulatirishi29@gmail.com" }]
-keywords = ["rag", "citations", "faithfulness", "nlp", "llm", "retrieval"]
+keywords = ["rag", "citations", "faithfulness", "nlp", "llm", "retrieval", "hallucination"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
 ]
 # Core is intentionally minimal — heavy deps are opt-in extras
 dependencies = []
@@ -31,10 +33,13 @@ bge      = ["sentence-transformers>=3.0", "torch>=2.2"]
 lancedb  = ["lancedb>=0.8"]
 bm25     = ["bm25s>=0.1"]
 cohere   = ["cohere>=5.0"]
+voyage   = ["voyageai>=0.2"]
 litellm  = ["litellm>=1.40"]
+yaml     = ["PyYAML>=6.0"]
 # Pin NLI model wrappers — silent upstream updates have wrecked benchmarks
 hhem     = ["transformers==4.44.*", "torch>=2.2"]
 minicheck = ["transformers==4.44.*", "torch>=2.2"]
+modal    = ["modal>=1.0"]
 eval     = ["ragas>=0.1", "deepeval>=0.21", "pandas>=2.0"]
 gradio   = ["gradio>=4.0"]
 dev = [
@@ -44,16 +49,41 @@ dev = [
     "ruff>=0.4",
     "pre-commit>=3.7",
     "hatchling>=1.24",
+    # Docs site
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+    "pymdown-extensions>=10.0",
 ]
 all = [
-    "verifiable-rag[docling,pymupdf,wtpsplit,bge,lancedb,bm25,litellm,hhem,minicheck,eval]",
+    "verifiable-rag[docling,pymupdf,wtpsplit,bge,lancedb,bm25,cohere,litellm,yaml,hhem,minicheck,eval]",
 ]
 
 [project.urls]
-Repository = "https://github.com/rishisg2/verifiable-rag"
+Homepage = "https://github.com/firish/rag-rack"
+Repository = "https://github.com/firish/rag-rack"
+Issues = "https://github.com/firish/rag-rack/issues"
+Changelog = "https://github.com/firish/rag-rack/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_rag"]
+
+# Bundled demo document — kept under examples/data/ for repo visibility,
+# also shipped inside the wheel at verifiable_rag/_data/ so the
+# verifiable_rag.demo helpers work after `pip install`.
+[tool.hatch.build.targets.wheel.force-include]
+"examples/data/sample.pdf"         = "verifiable_rag/_data/sample.pdf"
+"examples/data/sample.parsed.json" = "verifiable_rag/_data/sample.parsed.json"
+"examples/data/sample.txt"         = "verifiable_rag/_data/sample.txt"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/verifiable_rag/**",
+    "examples/**",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "pyproject.toml",
+]
 
 # ---------------------------------------------------------------------------
 # Ruff — lint + format

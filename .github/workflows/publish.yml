@@ -1,0 +1,89 @@
+name: Publish to PyPI
+
+# Publishes the package to PyPI when a tag matching v*.*.* is pushed.
+# Uses PyPI's Trusted Publishing (OIDC) — no API tokens or secrets needed.
+#
+# One-time setup on PyPI:
+#   1. Create the project at https://pypi.org/manage/account/publishing/
+#   2. Configure a trusted publisher with:
+#        Owner: firish (or whichever GitHub org/user owns the repo)
+#        Repository: rag-rack
+#        Workflow filename: publish.yml
+#        Environment: pypi
+#   3. Push a tag: `git tag v0.5.0 && git push --tags`
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  # Manual dispatch for testing without a tag push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build hatchling
+
+      - name: Verify pyproject version matches tag (skip on manual dispatch)
+        if: github.event_name == 'push'
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PROJ_VERSION=$(python -c "import tomllib; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['project']['version'])")
+          if [ "$TAG_VERSION" != "$PROJ_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match pyproject version ($PROJ_VERSION)"
+            exit 1
+          fi
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Verify bundled demo data is present in the wheel
+        run: |
+          python -m zipfile -l dist/*.whl | tee /tmp/wheel-contents.txt
+          for f in sample.pdf sample.parsed.json sample.txt; do
+            if ! grep -q "verifiable_rag/_data/$f" /tmp/wheel-contents.txt; then
+              echo "missing _data/$f in wheel"
+              exit 1
+            fi
+          done
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # Required for PyPI Trusted Publishing via OIDC
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/project/verifiable-rag/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Trusted Publishing — no password/token needed
+          packages-dir: dist/

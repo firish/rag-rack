@@ -52,6 +52,13 @@ class Pipeline:
 
     _documents: dict[str, Document] = field(default_factory=dict, init=False, repr=False)
 
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> "Pipeline":
+        """Build a Pipeline from a YAML config. See verifiable_rag.config for schema."""
+        from verifiable_rag.config import load_pipeline_from_yaml
+
+        return load_pipeline_from_yaml(path)
+
     def ingest(self, path: str | Path) -> Document:
         """Parse, chunk, embed, and index a document.
 

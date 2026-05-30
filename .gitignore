@@ -33,6 +33,9 @@ htmlcov/
 # Benchmark datasets (downloaded at runtime, not committed)
 benchmarks/data/
 
+# mkdocs build output (deployed to gh-pages via CI)
+site/
+
 # Test PDFs — drop your own at tests/parsers/fixtures/sample.pdf; never commit them
 tests/parsers/fixtures/*.pdf
 

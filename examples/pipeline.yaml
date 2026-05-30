@@ -1,0 +1,106 @@
+# Example verifiable-rag pipeline config.
+#
+# Build a pipeline from this file:
+#
+#   from verifiable_rag import Pipeline
+#   pipeline = Pipeline.from_yaml("examples/pipeline.yaml")
+#
+# To see every component type the loader knows about:
+#
+#   from verifiable_rag.config import registered_types
+#   for component, types in registered_types().items():
+#       print(component, types)
+
+# --- Parser -----------------------------------------------------------------
+# Choose: docling (best quality, slow, OCR-capable) | pymupdf (fast, text-only)
+# Use `fallback:` to chain a second parser when the primary fails. Optional
+# `cache: true` wraps the parser in a content-hashed JSON cache so re-ingests
+# are free.
+parser:
+  type: docling
+  fallback: pymupdf
+  cache: true
+
+# --- Chunker ---------------------------------------------------------------
+# Currently only `parent_child` is registered. Sentence-level citation IDs
+# survive every chunk transformation regardless.
+#
+# Optional ContextualChunker wrapper (Anthropic 2024) — generates a short
+# LLM-written preamble per Section / Paragraph / Chunk and prepends it
+# before embedding. Costs an LLM call per group; see
+# blog/04_litqa2_ablation.md for when it's worth it.
+chunker:
+  type: parent_child
+  config:
+    max_child_tokens: 400
+    min_child_tokens: 100
+  contextual:
+    enabled: false       # set true to enable Contextual Retrieval
+    granularity: section # section (cheapest) | paragraph | chunk
+    model: claude-haiku-4-5-20251001
+
+# --- Embedder -------------------------------------------------------------
+# Choose: bge (local, free, 384-dim) | cohere (hosted, 1024-dim, paid)
+#       | voyage (hosted, paid)
+# Cohere is the default for the "hybrid_balanced" preset.
+embedder:
+  type: cohere
+  config: {}
+
+# --- Indexer -------------------------------------------------------------
+# Hybrid (dense + BM25) is the only supported indexer shape today.
+# The `uri:` field controls where LanceDB writes — keep separate uris
+# per experiment so indexes don't collide.
+indexer:
+  dense:
+    type: lancedb
+    uri: .verifiable_rag_cache/indexes/my_pipeline
+  sparse:
+    type: bm25
+
+# --- Reranker -------------------------------------------------------------
+# Choose: cohere | bge | none
+# `none` skips reranking entirely (slightly worse retrieval quality, lower cost).
+reranker:
+  type: cohere
+  config: {}
+
+# --- Generator -------------------------------------------------------------
+# Choose: constrained (recommended — schema-forced citations, ReClaim-style)
+#       | prompted   (works with any LiteLLM model)
+#       | safe       (atomic-claim decomposition — SAFE, May 2025)
+#
+# `model:` accepts any LiteLLM model id — anthropic/claude-*, openai/gpt-*,
+# gemini/*, groq/*, ollama/*, etc.
+generator:
+  type: constrained
+  config:
+    model: anthropic/claude-haiku-4-5
+
+# --- Verifier -------------------------------------------------------------
+# Choose: dual_nli (recommended — HHEM + MiniCheck ensemble, the published
+#                  RAGTruth-calibrated default)
+#       | hhem     (single NLI verifier, ~600M)
+#       | none     (skip verification — use only with strictness=loose)
+#
+# For dual_nli you can swap the underlying scorers and tune the aggregation.
+# Threshold default 0.0562 is fit on RAGTruth-train; re-calibrate for your domain.
+verifier:
+  type: dual_nli
+  config:
+    scorer_a: hhem
+    scorer_b: minicheck
+    aggregation: min     # min (HALT-RAG-style) | mean | max
+    threshold: 0.0562
+
+# --- Pipeline-level knobs --------------------------------------------------
+# strictness controls the refusal threshold on the verifier's faithfulness
+# score:
+#   loose    → never refuse (verifier scores are informational only)
+#   balanced → refuse below 0.5 (default)
+#   strict   → refuse below 0.7
+#   paranoid → refuse below 0.9
+pipeline:
+  strictness: balanced
+  top_k_retrieve: 100
+  top_k_rerank: 10

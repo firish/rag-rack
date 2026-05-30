@@ -1,0 +1,33 @@
+Penicillin: An Overview
+
+History
+
+Penicillin was discovered in 1928 by Scottish bacteriologist Alexander Fleming at St. Mary's Hospital in London. While studying Staphylococcus bacteria, Fleming observed that a contaminating mold of the genus Penicillium had killed the bacteria in a portion of his culture plate. He named the active antibacterial substance "penicillin." The discovery is widely regarded as one of the most significant events in the history of medicine.
+
+Despite the importance of the discovery, Fleming was unable to isolate penicillin in sufficient quantities for clinical use. The breakthrough came over a decade later. In 1939, a team at Oxford University led by Howard Florey and Ernst Boris Chain began the work of purifying penicillin and demonstrating its therapeutic effects. By 1941, the Oxford group had treated their first human patient, a policeman named Albert Alexander, with promising initial results that ultimately failed due to insufficient drug supply.
+
+Mass production of penicillin became feasible during the Second World War through industrial fermentation techniques developed primarily in the United States. By 1944, penicillin was available to treat Allied soldiers wounded on D-Day. Fleming, Florey, and Chain shared the Nobel Prize in Physiology or Medicine in 1945 for the discovery and development of penicillin.
+
+Mechanism of Action
+
+Penicillin belongs to a broad class of antibiotics called beta-lactams, named for the four-membered beta-lactam ring at the core of their molecular structure. The drug targets a specific step in bacterial cell wall synthesis. Bacterial cell walls are composed of peptidoglycan, a polymer cross-linked by enzymes known as penicillin-binding proteins (PBPs).
+
+Penicillin binds covalently to the active sites of PBPs, irreversibly inhibiting the cross-linking step. As actively growing bacteria attempt to divide, their newly synthesized cell walls cannot maintain structural integrity. Osmotic pressure causes the bacterial cells to rupture and die. Because human cells do not have peptidoglycan cell walls, penicillin selectively targets bacteria with minimal direct toxicity to human tissue.
+
+This mechanism explains both the strengths and the limitations of penicillin. It is only effective against actively dividing bacteria and works primarily on gram-positive organisms whose cell walls are more accessible to the drug. Gram-negative bacteria, with their additional outer membrane, are generally less susceptible to natural penicillin G.
+
+Resistance
+
+Bacterial resistance to penicillin emerged remarkably quickly after its introduction. The first documented penicillin-resistant Staphylococcus aureus appeared in the early 1940s, even before penicillin was widely available. Resistance is most commonly mediated by the production of beta-lactamase enzymes, which hydrolyze the beta-lactam ring and inactivate the drug.
+
+Resistance has driven decades of antibiotic chemistry. Semi-synthetic penicillins such as methicillin and oxacillin were developed in the 1950s and 1960s to resist beta-lactamase. Combination therapies pairing penicillins with beta-lactamase inhibitors like clavulanic acid extended the useful range of the original compounds. Each new resistance mechanism has driven a corresponding therapeutic countermeasure.
+
+Today, methicillin-resistant Staphylococcus aureus (MRSA) is a major nosocomial pathogen and has been the focus of intensive research on alternative antibiotics. The trajectory of penicillin resistance is often cited as the canonical example of why antibiotic stewardship matters.
+
+Clinical Use
+
+Penicillin remains a first-line treatment for several common infections, including streptococcal pharyngitis, syphilis, and certain forms of bacterial meningitis caused by susceptible organisms. Different formulations of penicillin (penicillin G, penicillin V, benzathine penicillin) are selected based on the route of administration and desired duration of action.
+
+The drug is generally well tolerated, though penicillin allergy is reported by approximately ten percent of patients in the United States. Most reported allergies are mild or attributable to other causes; confirmed severe allergic reactions including anaphylaxis are far less common. Skin testing protocols are routinely used to assess patients with reported allergy histories before administering penicillin or related beta-lactam antibiotics.
+
+Modern derivatives of penicillin include the cephalosporins, carbapenems, and monobactams, all of which share the beta-lactam ring but differ in their spectrum of activity, resistance to beta-lactamases, and clinical use cases. Together, the beta-lactam family remains one of the most important classes of antibiotics in clinical medicine, more than nine decades after Fleming's original observation.
