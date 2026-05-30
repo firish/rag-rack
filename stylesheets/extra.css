@@ -1,0 +1,61 @@
+/* Custom CSS for the verifiable-rag docs site.
+ * Mostly small tweaks on top of mkdocs-material's defaults.
+ */
+
+/* Slightly tighter line-height on body text for denser pages */
+.md-typeset {
+  line-height: 1.6;
+}
+
+/* Make code blocks a bit more compact */
+.md-typeset pre > code {
+  padding: 0.75em 1em;
+  font-size: 0.85em;
+}
+
+/* Inline code chips on light backgrounds */
+.md-typeset code {
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* Tables — striped rows look better for dense numeric tables */
+.md-typeset table:not([class]) tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Pull-out callouts for the headline-finding cards on the home page */
+.grid.cards > * {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  padding: 1.25em;
+  margin: 0.5em 0;
+}
+
+/* Subtle hover state on doc cards */
+.grid.cards > *:hover {
+  border-color: var(--md-primary-fg-color--light);
+  transition: border-color 0.15s ease-in-out;
+}
+
+/* Star indicators (⭐) in tables — bolder color so the reader's eye lands there */
+.md-typeset td:contains("⭐"),
+.md-typeset th:contains("⭐") {
+  font-weight: 600;
+}
+
+/* Tighten up the API reference symbol headings */
+.md-typeset h2 code,
+.md-typeset h3 code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+/* Footer attribution — the site already shows the repo link in the header */
+.md-copyright__highlight {
+  font-size: 0.78em;
+}
