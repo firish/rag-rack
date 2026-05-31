@@ -160,10 +160,12 @@ That's the configuration that gets the published 0.875 on the full LitQA2 test c
 
 ## What's next
 
-LitQA2 is the second-published benchmark in the library (after ALCE — see [previous post](https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md)). The third is RAGTruth, where the question shifts from *citation generation* to *post-hoc faithfulness verification* — and where a dual NLI ensemble matches a frontier LLM judge at 1/250th the cost ([blog #3](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md)).
+LitQA2 is one of three published benchmarks in the library — the others are [ALCE](https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md) (citation generation) and [RAGTruth](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md) (post-hoc faithfulness verification, where a dual NLI ensemble matches a frontier LLM judge at 1/250th the cost).
 
-Phase 5 is the launch sprint: Gradio demo on HuggingFace Spaces with PDF viewer + citation chips + faithfulness badges + strictness slider, mkdocs-material docs, YAML pipeline configs. If you'd find a library like this useful — span-grounded citations, calibrated NLI verification, refusal-when-uncertain — drop a star on the repo or open an issue with your use case.
+The natural next direction is HyDE for query enhancement, late chunking with long-context embedders, and visual citation highlighting — see [the feature roadmap post](https://github.com/firish/rag-rack/blob/main/blog/05_what_we_have_and_whats_next.md) for what's in the library today and what's planned next.
 
-The library is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack), MIT-licensed and pre-alpha. Don't ship to production yet; wait for v0.5. But the benchmark reports under [`benchmarks/`](https://github.com/firish/rag-rack/tree/main/benchmarks) are the audit trail for everything I post about — every published number can be reproduced from the commands listed there.
+If you'd find this kind of library useful — span-grounded citations, calibrated NLI verification, refusal-when-uncertain — drop a star on [the repo](https://github.com/firish/rag-rack) or open an issue with your use case.
+
+The library is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack) — MIT-licensed, on PyPI (`pip install verifiable-rag`), docs at [firish.github.io/rag-rack](https://firish.github.io/rag-rack/). The benchmark reports under [`benchmarks/`](https://github.com/firish/rag-rack/tree/main/benchmarks) are the audit trail for everything I post about — every published number can be reproduced from the commands listed there.
 
 Methodology critiques welcome. The whole moat is eval rigor; the only way to find the holes is to invite people to look for them.

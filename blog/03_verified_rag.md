@@ -145,7 +145,7 @@ The default threshold (0.0562) was fit on RAGTruth train with min aggregation. *
 
 **Haiku-as-judge does not calibrate well on small samples.** I tried it (Haiku 4.5, 300 train, 600 test) and the train-fit threshold collapsed to a knife-edge that didn't transfer — calibrated F1 fell to 0.14 from an in-sample 0.66. The mechanism is real: RAGTruth train has a 46% hallucination base rate vs test's 35%, and Haiku's confidence distribution is near-bimodal (most claims either obviously supported or obviously not). With 300 train examples that combination found a degenerate threshold. Fix: either more train data or a different operating-point criterion (balanced accuracy instead of F1). I'm flagging this as future work; for now Haiku-judge is in the "in-sample exploratory" bin in my published numbers, not the "production-ready" bin.
 
-**RAGTruth is just one benchmark.** The dual matching Sonnet on RAGTruth doesn't guarantee it matches Sonnet on FaithBench, HaluBench, or your domain's hallucinations. I'd love to cross-validate on FaithBench but that dataset is currently HF-gated. HaluBench cross-validation is on my Phase 5 backlog.
+**RAGTruth is just one benchmark.** The dual matching Sonnet on RAGTruth doesn't guarantee it matches Sonnet on FaithBench, HaluBench, or your domain's hallucinations. FaithBench is currently HF-gated; HaluBench cross-validation is on the backlog.
 
 **Threshold transfer is sensitive to base rate.** Train (46% hall) and test (35% hall) have meaningfully different base rates in RAGTruth. The optimal F1-maximizing threshold depends on base rate, so applying a train-fit threshold to a different-base-rate test introduces some bias. A base-rate-aware calibration (e.g. optimize at fixed precision, or use balanced accuracy) would be more rigorous. The honest takeaway: the published F1 numbers are within a couple of points of the true value, but they're not precise to the third decimal.
 
@@ -161,18 +161,18 @@ Three concrete takeaways:
 
 3. **Calibrate on labeled data, not vibes.** The in-sample best-F1 threshold and the train-fit threshold differ by 1–2 F1 points in my measurements — small but not zero. Reporting in-sample numbers is the most common rigor failure I see in RAG eval; don't do it.
 
-I'm shipping `DualNLIVerifier` as the library default in the next release. The full benchmark report (with per-model breakdowns, reproducibility instructions, and source numbers) lives at [benchmarks/PUBLISHED_ragtruth.md](https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md). The library itself is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack) — Phase 0–4 done, Phase 5 (reference UI, hardening, mkdocs site) is next.
+`DualNLIVerifier` ships as the library's recommended default. The full benchmark report (with per-model breakdowns, reproducibility instructions, and source numbers) lives at [benchmarks/PUBLISHED_ragtruth.md](https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md). The library is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack) — MIT-licensed, on PyPI (`pip install verifiable-rag`), docs at [firish.github.io/rag-rack](https://firish.github.io/rag-rack/).
 
 ---
 
 ## What's next
 
-Phase 5: a Gradio demo on HuggingFace Spaces with PDF preview, citation chips, and a faithfulness-strictness slider. Plus mkdocs-material docs, tutorials, and YAML pipeline configs.
+The natural follow-ups are sentence-level NLI ensembling (currently response-level), HyDE for query enhancement, late chunking with long-context embedders, and visual citation highlighting in the audit report — see [the feature roadmap post](https://github.com/firish/rag-rack/blob/main/blog/05_what_we_have_and_whats_next.md) for the full list of what's in the library today and what's planned for the next few releases.
 
-Phase 6: launch on HN, X, r/LocalLLaMA, r/MachineLearning. If you'd find a library like this useful — span-grounded citations, calibrated NLI verification, refusal when the system can't ground the answer — drop a star on the repo or open an issue with your use case. Phase 5 priorities get shaped by real users; what I build next depends on who's asking.
+If you'd find this kind of library useful — span-grounded citations, calibrated NLI verification, refusal when the system can't ground the answer — drop a star on [the repo](https://github.com/firish/rag-rack) or open an issue with your use case. Roadmap priorities get shaped by real users.
 
 ---
 
-*verifiable-rag is MIT-licensed and pre-alpha. Don't ship it to production yet — wait for v0.5. But do follow along: I publish a results post at the end of every phase, and the next one (sentence-level citations, ALCE results) drops once I backfill it from the actual numbers.*
+*verifiable-rag is MIT-licensed and on PyPI (`pip install verifiable-rag`). Documentation at [firish.github.io/rag-rack](https://firish.github.io/rag-rack/). For the citation-generation half of the story (constrained decoding vs prompted on ALCE), see [the companion post](https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md). Methodology critiques welcome — eval rigor is the whole moat.*
 
 *Find me on [X](https://x.com/) / [GitHub](https://github.com/firish/rag-rack). Eval rigor is the whole moat — if you spot a methodology hole, I want to hear about it.*

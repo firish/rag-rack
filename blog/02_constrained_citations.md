@@ -160,7 +160,7 @@ The prompted variant (`PromptedCitedGenerator`) is still shipped for two reasons
 
 **Constrained requires structured-output support.** Closed-API models (Anthropic, OpenAI, Gemini) all support this natively. Local open-weights models need `outlines` or `lm-format-enforcer` as a runtime dependency. If you're running Llama-3 locally you have a working path but the integration is slightly more work than just installing `litellm`.
 
-**Retrieval held constant.** ALCE ships pre-retrieved passages so I could isolate the generator. That's by design — but it means these numbers don't reflect end-to-end RAG quality where retrieval mistakes compound with citation mistakes. For an end-to-end test with real retrieval, see the LitQA2 result (next blog post, after I improve retrieval with [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)).
+**Retrieval held constant.** ALCE ships pre-retrieved passages so the generator is what's under test. That's by design — but it means these numbers don't reflect end-to-end RAG quality where retrieval mistakes compound with citation mistakes. For an end-to-end test with real retrieval, see the [LitQA2 ablation post](https://github.com/firish/rag-rack/blob/main/blog/04_litqa2_ablation.md), which includes the [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) comparison.
 
 ---
 
@@ -176,7 +176,7 @@ Three takeaways:
 
 I'm shipping `constrained` as the library's default generator. Prompted stays as the model-agnostic fallback for cases where structured output isn't available (some local models, niche providers).
 
-The full benchmark report with reproducibility instructions and per-sub-benchmark numbers lives at [benchmarks/PUBLISHED_alce.md](https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_alce.md). The library itself is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack) — pre-alpha, MIT-licensed, Phase 0–4 done, Phase 5 (Gradio demo + mkdocs docs + LitQA2 with Contextual Retrieval) is in progress.
+The full benchmark report with reproducibility instructions and per-sub-benchmark numbers lives at [benchmarks/PUBLISHED_alce.md](https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_alce.md). The library itself is [`verifiable-rag` on GitHub](https://github.com/firish/rag-rack) — MIT-licensed, on PyPI as `pip install verifiable-rag`. Documentation at [firish.github.io/rag-rack](https://firish.github.io/rag-rack/).
 
 ---
 
@@ -190,4 +190,4 @@ If span-grounded citations, calibrated NLI verification, and refusal-when-uncert
 
 ---
 
-*verifiable-rag is MIT-licensed and pre-alpha — don't put it in production yet, wait for v0.5. The benchmark reports under [`benchmarks/`](https://github.com/firish/rag-rack/tree/main/benchmarks) are the audit trail for everything I publish in posts like this. Methodology critiques welcome — eval rigor is the whole moat, and the only way to find the holes is to invite people to look for them.*
+*verifiable-rag is MIT-licensed and available on PyPI (`pip install verifiable-rag`). The benchmark reports under [`benchmarks/`](https://github.com/firish/rag-rack/tree/main/benchmarks) are the audit trail for everything I publish in posts like this. Methodology critiques welcome — eval rigor is the whole moat, and the only way to find the holes is to invite people to look for them.*
