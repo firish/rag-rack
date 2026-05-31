@@ -12,13 +12,13 @@
         <meta name="author" content="Rishi Gulati">
       
       
-        <link rel="canonical" href="https://firish.github.io/rag-rack/concepts/verification/">
+        <link rel="canonical" href="https://firish.github.io/rag-rack/blog/03_verified_rag/">
       
       
-        <link rel="prev" href="../citation-flow/">
+        <link rel="prev" href="../05_what_we_have_and_whats_next/">
       
       
-        <link rel="next" href="../strictness/">
+        <link rel="next" href="../02_constrained_citations/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Verification - verifiable-rag</title>
+        <title>Verified RAG: every sentence checked - verifiable-rag</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#verification" class="md-skip">
+        <a href="#verified-rag-every-sentence-checked" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Verification
+              Verified RAG: every sentence checked
             
           </span>
         </div>
@@ -271,13 +271,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../architecture/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../concepts/architecture/" class="md-tabs__link">
           
   
   
@@ -358,11 +356,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../blog/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -579,10 +579,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -600,22 +598,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -633,7 +628,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -651,7 +646,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+      <a href="../../concepts/architecture/" class="md-nav__link">
         
   
   
@@ -679,7 +674,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../citation-flow/" class="md-nav__link">
+      <a href="../../concepts/citation-flow/" class="md-nav__link">
         
   
   
@@ -704,37 +699,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Verification
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../concepts/verification/" class="md-nav__link">
         
   
   
@@ -750,153 +718,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-two-tier-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The two-tier interface
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#built-in-verifiers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Built-in verifiers
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Built-in verifiers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#hhemverifier-single-small-nli-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        HHEMVerifier — single small NLI model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#minicheckverifier-single-small-nli-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        MiniCheckVerifier — single small NLI model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dualnliverifier-the-recommended-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DualNLIVerifier ⭐ — the recommended default
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#llmjudgeverifier-llm-as-judge-fallback" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LLMJudgeVerifier — LLM-as-judge fallback
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#aggregation-strategies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Aggregation strategies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-verification-fits-in-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How verification fits in the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#calibration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Calibration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-verification-cant-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What verification can't do
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-benchmark-that-validates-this" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The benchmark that validates this
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -909,7 +730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../strictness/" class="md-nav__link">
+      <a href="../../concepts/strictness/" class="md-nav__link">
         
   
   
@@ -937,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../concepts/configuration/" class="md-nav__link">
         
   
   
@@ -1791,6 +1612,8 @@
       
   
   
+    
+  
   
   
     
@@ -1812,20 +1635,23 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../blog/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -1843,13 +1669,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1869,7 +1695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../blog/05_what_we_have_and_whats_next/" class="md-nav__link">
+      <a href="../05_what_we_have_and_whats_next/" class="md-nav__link">
         
   
   
@@ -1894,10 +1720,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../blog/03_verified_rag/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verified RAG: every sentence checked
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1913,6 +1766,125 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-matters-skip-if-you-live-in-rag-land" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this matters (skip if you live in RAG land)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-benchmark-ragtruth-calibrated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The benchmark — RAGTruth, calibrated
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-verifiers-actually-are" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the verifiers actually are
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-headline-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The headline result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-surprised-me-complementarity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What surprised me: complementarity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-youd-actually-ship" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you'd actually ship
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-honest-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The honest caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-means-if-youre-building-a-rag-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this means if you're building a RAG system
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1925,7 +1897,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../blog/02_constrained_citations/" class="md-nav__link">
+      <a href="../02_constrained_citations/" class="md-nav__link">
         
   
   
@@ -1953,7 +1925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../blog/04_litqa2_ablation/" class="md-nav__link">
+      <a href="../04_litqa2_ablation/" class="md-nav__link">
         
   
   
@@ -2008,10 +1980,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-two-tier-interface" class="md-nav__link">
+  <a href="#why-this-matters-skip-if-you-live-in-rag-land" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The two-tier interface
+        Why this matters (skip if you live in RAG land)
       
     </span>
   </a>
@@ -2019,71 +1991,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-verifiers" class="md-nav__link">
+  <a href="#the-benchmark-ragtruth-calibrated" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-in verifiers
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Built-in verifiers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#hhemverifier-single-small-nli-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        HHEMVerifier — single small NLI model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#minicheckverifier-single-small-nli-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        MiniCheckVerifier — single small NLI model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dualnliverifier-the-recommended-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DualNLIVerifier ⭐ — the recommended default
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#llmjudgeverifier-llm-as-judge-fallback" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LLMJudgeVerifier — LLM-as-judge fallback
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#aggregation-strategies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Aggregation strategies
+        The benchmark — RAGTruth, calibrated
       
     </span>
   </a>
@@ -2091,10 +2002,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-verification-fits-in-the-pipeline" class="md-nav__link">
+  <a href="#what-the-verifiers-actually-are" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How verification fits in the Pipeline
+        What the verifiers actually are
       
     </span>
   </a>
@@ -2102,10 +2013,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#calibration" class="md-nav__link">
+  <a href="#the-headline-result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Calibration
+        The headline result
       
     </span>
   </a>
@@ -2113,10 +2024,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-verification-cant-do" class="md-nav__link">
+  <a href="#what-surprised-me-complementarity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What verification can't do
+        What surprised me: complementarity
       
     </span>
   </a>
@@ -2124,10 +2035,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-benchmark-that-validates-this" class="md-nav__link">
+  <a href="#what-youd-actually-ship" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The benchmark that validates this
+        What you'd actually ship
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-honest-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The honest caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-means-if-youre-building-a-rag-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this means if you're building a RAG system
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's next
       
     </span>
   </a>
@@ -2151,7 +2095,7 @@
 
 
   
-    <a href="https://github.com/firish/rag-rack/edit/main/docs/concepts/verification.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/firish/rag-rack/edit/main/docs/blog/03_verified_rag.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -2159,190 +2103,194 @@
   
 
 
-<h1 id="verification">Verification<a class="headerlink" href="#verification" title="Anchor link to this section for reference">&para;</a></h1>
-<p>The headline differentiator: every generated sentence gets fact-checked against the source span it cites, by a fast small-model NLI ensemble that matches a frontier LLM judge.</p>
-<h2 id="the-two-tier-interface">The two-tier interface<a class="headerlink" href="#the-two-tier-interface" title="Anchor link to this section for reference">&para;</a></h2>
-<p>The library distinguishes two related abstractions:</p>
-<table>
-<thead>
-<tr>
-<th>Protocol</th>
-<th>Method</th>
-<th>Used by</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>NLIScorer</code></td>
-<td><code>score_pairs(pairs) → list[float]</code></td>
-<td>RAGTruth runner, ensemble composition</td>
-</tr>
-<tr>
-<td><code>Verifier</code></td>
-<td><code>verify(sentences, documents) → list[VerificationResult]</code></td>
-<td>The Pipeline</td>
-</tr>
-</tbody>
-</table>
-<p>A <code>Verifier</code> builds <code>(premise, hypothesis)</code> pairs from <code>CitedSentence</code> + <code>Document</code> and feeds them to an <code>NLIScorer</code>. Most concrete classes (<code>HHEMVerifier</code>, <code>DualNLIVerifier</code>) implement both — they can be used either as a Pipeline verifier or as a raw scorer for benchmark runners.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># As a Pipeline verifier</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">verifier</span><span class="o">=</span><span class="n">DualNLIVerifier</span><span class="p">(</span><span class="n">HHEMVerifier</span><span class="p">(),</span> <span class="n">MiniCheckVerifier</span><span class="p">()))</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># As a raw scorer for benchmark scoring</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.eval.ragtruth_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_ragtruth</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">report</span> <span class="o">=</span> <span class="n">run_ragtruth</span><span class="p">(</span><span class="n">DualNLIVerifier</span><span class="p">(</span><span class="n">HHEMVerifier</span><span class="p">(),</span> <span class="n">MiniCheckVerifier</span><span class="p">()),</span> <span class="n">bench</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="built-in-verifiers">Built-in verifiers<a class="headerlink" href="#built-in-verifiers" title="Anchor link to this section for reference">&para;</a></h2>
-<h3 id="hhemverifier-single-small-nli-model"><code>HHEMVerifier</code> — single small NLI model<a class="headerlink" href="#hhemverifier-single-small-nli-model" title="Anchor link to this section for reference">&para;</a></h3>
-<p>Vectara's HHEM-2.1-open (~600M params, T5-Flan-Large backbone). Trained on summarization-style entailment.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.verifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">HHEMVerifier</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">verifier</span> <span class="o">=</span> <span class="n">HHEMVerifier</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># default threshold</span>
-</span></code></pre></div>
+<h1 id="verified-rag-every-sentence-checked">Verified RAG: every sentence checked<a class="headerlink" href="#verified-rag-every-sentence-checked" title="Anchor link to this section for reference">&para;</a></h1>
+<p><em>How a 600M + 770M NLI ensemble matches Claude Sonnet at hallucination detection on RAGTruth — at 1/250<sup>th</sup> the per-call cost.</em></p>
+<hr />
+<p>I've been building <a href="https://github.com/firish/rag-rack"><code>verifiable-rag</code></a> — a Python library for document-grounded Q&amp;A that produces sentence-level citations and verifies every claim against its cited span. The pitch is that the system either answers truthfully or refuses; it does not generate plausible-sounding nonsense.</p>
+<p>That pitch only holds if the verifier is good. So I spent the last week running calibrated benchmarks on RAGTruth — the 18K-example canonical hallucination-detection corpus — to figure out <strong>what actually works for production-grade faithfulness verification</strong>.</p>
+<p>The headline finding:</p>
+<blockquote>
+<p><strong>A dual ensemble of two small NLI models (HHEM-2.1-open + MiniCheck-Flan-T5-Large, combined via min aggregation) matches Claude Sonnet 4.6's hallucination-detection quality on RAGTruth — at roughly 1/250<sup>th</sup> the per-call cost.</strong></p>
+</blockquote>
+<p>That number deserves an asterisk for sample-size reasons I'll get into. But the direction is clear and reproducible: cheap, open-source NLI verifiers are within striking distance of frontier LLM judges on the metric people actually care about (response-level hallucination F1), and they're already there on AUROC.</p>
+<p>Below: how I got there, what surprised me, what the production recommendation is, and where it breaks.</p>
+<hr />
+<h2 id="why-this-matters-skip-if-you-live-in-rag-land">Why this matters (skip if you live in RAG land)<a class="headerlink" href="#why-this-matters-skip-if-you-live-in-rag-land" title="Anchor link to this section for reference">&para;</a></h2>
+<p>Every shipping "chat with your documents" product (NotebookLM, ChatPDF, Humata, Adobe Acrobat AI) stops at chunk-level citations and prompt-conditioned grounding. The model is told to cite its sources; in practice, ~10–15% of the time it cites something irrelevant or just fabricates plausible nonsense (see NotebookLM's own published numbers).</p>
+<p>The 2024–2026 research literature has solved the underlying problem twice over:</p>
 <ul>
-<li><strong>Strengths:</strong> Very strong on QA-style entailment (factoid claims against retrieved passages). RAGTruth AUROC 0.81.</li>
-<li><strong>Weaknesses:</strong> Weak on data-to-text claims (Yelp records → narrative). RAGTruth Data2txt AUROC 0.57.</li>
+<li><strong>Span-level attribution</strong> — ReClaim (ACL 2024), SAFE (May 2025), LAQuer (ACL 2025) all show how to make every generated sentence carry a tight pointer to the source span that entails it.</li>
+<li><strong>Post-hoc faithfulness verification</strong> — small NLI models like Vectara's HHEM-2.1-open and Liyan Tang's MiniCheck can fact-check claims at inference time and flag the unsupported ones.</li>
 </ul>
-<h3 id="minicheckverifier-single-small-nli-model"><code>MiniCheckVerifier</code> — single small NLI model<a class="headerlink" href="#minicheckverifier-single-small-nli-model" title="Anchor link to this section for reference">&para;</a></h3>
-<p>Liyan Tang's MiniCheck-Flan-T5-Large (~770M params). Trained on synthetic claim decompositions, multi-domain.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.verifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">MiniCheckVerifier</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">verifier</span> <span class="o">=</span> <span class="n">MiniCheckVerifier</span><span class="p">()</span>
-</span></code></pre></div>
-<ul>
-<li><strong>Strengths:</strong> Better than HHEM on structured-data-to-text claims (RAGTruth Data2txt AUROC 0.70).</li>
-<li><strong>Weaknesses:</strong> Slightly worse than HHEM on QA, slower at inference.</li>
-</ul>
-<h3 id="dualnliverifier-the-recommended-default"><code>DualNLIVerifier</code> ⭐ — the recommended default<a class="headerlink" href="#dualnliverifier-the-recommended-default" title="Anchor link to this section for reference">&para;</a></h3>
-<p>Combines two scorers via min/mean/max aggregation. The published baseline.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.verifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DualNLIVerifier</span><span class="p">,</span> <span class="n">HHEMVerifier</span><span class="p">,</span> <span class="n">MiniCheckVerifier</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">verifier</span> <span class="o">=</span> <span class="n">DualNLIVerifier</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">HHEMVerifier</span><span class="p">(),</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">MiniCheckVerifier</span><span class="p">(),</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">,</span>   <span class="c1"># HALT-RAG convention: any scorer flagging = flag</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0562</span><span class="p">,</span>    <span class="c1"># RAGTruth-train-calibrated default</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
-</span></code></pre></div>
-<ul>
-<li><strong>AUROC: 0.844 on RAGTruth (vs 0.846 for Sonnet judge)</strong></li>
-<li><strong>Per-call cost: ~$0.0004 (vs ~$0.05 for Sonnet)</strong></li>
-<li><strong>F1: 0.706 calibrated on held-out test</strong></li>
-</ul>
-<p>Why dual beats single: HHEM and MiniCheck have <strong>complementary blind spots</strong>. HHEM's training distribution doesn't cover Data2txt; MiniCheck's does. Ensembling at the <code>min</code> aggregation flags an example if either scorer says unsupported — net effect is the union of "either model caught it."</p>
-<p><a href="https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md">Full RAGTruth result →</a></p>
-<h3 id="llmjudgeverifier-llm-as-judge-fallback"><code>LLMJudgeVerifier</code> — LLM-as-judge fallback<a class="headerlink" href="#llmjudgeverifier-llm-as-judge-fallback" title="Anchor link to this section for reference">&para;</a></h3>
-<p>For comparison and "ceiling" use cases. Uses LiteLLM to route to any chat LLM. Anthropic prompt caching enabled by default on system + premise.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.verifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeVerifier</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">verifier</span> <span class="o">=</span> <span class="n">LLMJudgeVerifier</span><span class="p">(</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;anthropic/claude-sonnet-4-6&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">max_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>           <span class="c1"># ThreadPoolExecutor for concurrent calls</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">num_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
-</span></code></pre></div>
-<ul>
-<li><strong>Strengths:</strong> Best-quality single model. Useful as a benchmark ceiling.</li>
-<li><strong>Weaknesses:</strong> ~250× higher per-call cost than Dual NLI. API rate limits. Bursty failures under load.</li>
-</ul>
-<p>Most production deployments shouldn't use this as the primary verifier. The Dual NLI matches it on RAGTruth; reserve LLM-judge for offline eval and adversarial testing.</p>
-<h2 id="aggregation-strategies">Aggregation strategies<a class="headerlink" href="#aggregation-strategies" title="Anchor link to this section for reference">&para;</a></h2>
-<p><code>DualNLIVerifier</code> and <code>EnsembleScorer</code> support three aggregations:</p>
-<table>
-<thead>
-<tr>
-<th>Aggregation</th>
-<th>Per-pair behavior</th>
-<th>Use case</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>min</code> ⭐</td>
-<td>flag if <em>any</em> scorer says unsupported</td>
-<td><strong>Default</strong> — HALT-RAG convention, most sensitive</td>
-</tr>
-<tr>
-<td><code>mean</code></td>
-<td>average the scores</td>
-<td>Smoother — for calibration where bimodal scores hurt</td>
-</tr>
-<tr>
-<td><code>max</code></td>
-<td>flag only if <em>all</em> scorers say unsupported</td>
-<td>Lenient — high precision, lower recall</td>
-</tr>
-</tbody>
-</table>
-<p>The published RAGTruth result uses <code>min</code>. Switch to <code>mean</code> if your scorer outputs are noisy and the <code>min</code> aggregation flags too aggressively.</p>
-<h2 id="how-verification-fits-in-the-pipeline">How verification fits in the Pipeline<a class="headerlink" href="#how-verification-fits-in-the-pipeline" title="Anchor link to this section for reference">&para;</a></h2>
-<p>When the Pipeline runs <code>answer = pipeline.ask(query)</code>:</p>
+<p>None of it has shipped in a usable library. The gap I'm filling.</p>
+<p>But "verify every claim with an NLI model" has been a known recipe for a while. The unsolved practical question is <strong>which NLI model, and what does it actually buy you over the easy alternative (just ask GPT-4)?</strong> Especially given that LLM-as-judge is by far the most common production pattern today.</p>
+<p>That's what the benchmark answers.</p>
+<hr />
+<h2 id="the-benchmark-ragtruth-calibrated">The benchmark — RAGTruth, calibrated<a class="headerlink" href="#the-benchmark-ragtruth-calibrated" title="Anchor link to this section for reference">&para;</a></h2>
+<p><a href="https://huggingface.co/datasets/wandb/RAGTruth-processed">RAGTruth</a> (Niu et al., NAACL 2024) is the canonical RAG-hallucination corpus. It ships ~18K LLM responses across three tasks (QA, Data-to-text, Summary) from six generating LLMs (GPT-3.5/4, Llama-2-7B/13B/70B, Mistral-7B), each with word-level human annotations marking which spans are hallucinations.</p>
+<p>For verification testing, each example is <code>(context, response, gold_hallucination_spans)</code>. The verifier's job is binary: given the context and the LLM-generated response, was the response hallucinated or clean? I report response-level F1, AUROC, and AUPRC.</p>
+<p><strong>Methodology that matters:</strong> every threshold I report is fit on a held-out <strong>train split</strong> and applied to <strong>test</strong>. The "in-sample best F1" numbers (which you'll see in some papers) are an upper bound, not what you should expect in production — and they were typically only 0.5–1pp higher than my calibrated numbers in my runs, so the discipline cost was small.</p>
+<hr />
+<h2 id="what-the-verifiers-actually-are">What the verifiers actually are<a class="headerlink" href="#what-the-verifiers-actually-are" title="Anchor link to this section for reference">&para;</a></h2>
+<p>Three flavors, all behind the same <code>NLIScorer</code> interface (one method: <code>score_pairs(pairs: list[tuple[str, str]]) -&gt; list[float]</code>):</p>
 <ol>
-<li>Generator produces <code>cited_sentences: list[CitedSentence]</code></li>
-<li><strong>If a verifier is configured</strong>, it produces <code>verification_results: list[VerificationResult]</code></li>
-<li>The Pipeline applies <strong>strictness-controlled filtering</strong>:<ul>
-<li><code>loose</code>: every generated sentence is returned (verification is informational)</li>
-<li><code>balanced</code> / <code>strict</code> / <code>paranoid</code>: sentences with <code>is_supported=False</code> are <strong>surgically removed</strong>; if the resulting answer's faithfulness score drops below the strictness threshold, the whole answer is <strong>refused</strong></li>
-</ul>
-</li>
-<li>The remaining sentences become <code>answer.sentences</code>; the dropped ones become <code>answer.unsupported_claims</code></li>
+<li><strong>HHEM-2.1-open</strong> (Vectara, ~600M params, T5-Flan-Large backbone). Trained on summarization-style entailment. The closest thing to a "default" small NLI verifier in the open-source ecosystem.</li>
+<li><strong>MiniCheck-Flan-T5-Large</strong> (Liyan Tang et al. 2024, ~770M params). Trained on synthetic claim decompositions across multiple domains. Different training distribution from HHEM.</li>
+<li><strong>LLM-as-judge</strong> (Claude Haiku 4.5, Claude Sonnet 4.6). Per-claim prompt: "is this claim entailed by this passage?" → structured JSON output.</li>
 </ol>
-<p>See the <a href="../strictness/">strictness concept page</a> for the threshold table.</p>
-<h2 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Anchor link to this section for reference">&para;</a></h2>
-<p>The default thresholds (HHEM 0.3, Dual NLI 0.0562) are fit on RAGTruth-train. <strong>They are not guaranteed to be optimal for your domain.</strong></p>
-<p>If your inputs are different (legal contracts, medical notes, code documentation), you should re-fit the threshold on a small labeled validation set from your domain. The library ships a calibration script:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/compute_calibrated_metrics.py<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span>--verifier<span class="w"> </span><span class="s2">&quot;DualNLI:my_train_scores.jsonl:my_test_scores.jsonl&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>--slug<span class="w"> </span>my_domain_calibrated
-</span></code></pre></div>
-<p><a href="../../how-to/calibrate-threshold/">Full calibration walkthrough →</a></p>
-<h2 id="what-verification-cant-do">What verification <em>can't</em> do<a class="headerlink" href="#what-verification-cant-do" title="Anchor link to this section for reference">&para;</a></h2>
-<ul>
-<li><strong>It can't catch citation-cite mismatches that the verifier itself was trained to accept.</strong> If the NLI model was trained on summarization data and you're verifying scientific claims, edge cases may slip through.</li>
-<li><strong>It can't validate facts outside the cited span.</strong> If the LLM emits "Penicillin was discovered in 1928" and the cited source span only says "in the late 1920s," the NLI model probably accepts it. Strict factuality requires post-hoc fact-checking against a knowledge base, which is out of scope.</li>
-<li><strong>It can't fix bad retrieval.</strong> If the right source passage was never retrieved, the verifier can only flag the generator's output as unsupported — it can't reach back into the corpus to find the missing evidence.</li>
-</ul>
-<p>These limits are why the audit trail matters: every published number comes with its caveats; every Answer ships its full decision path so reviewers can spot the holes.</p>
-<h2 id="the-benchmark-that-validates-this">The benchmark that validates this<a class="headerlink" href="#the-benchmark-that-validates-this" title="Anchor link to this section for reference">&para;</a></h2>
-<p><a href="https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md">RAGTruth</a> is the canonical 2,700-example RAG hallucination corpus (Niu et al., NAACL 2024). Our calibrated numbers:</p>
+<p>I ran each verifier on the full RAGTruth test split (2700 examples) where compute allowed, fit the threshold on a stratified subset of train (1500 examples for the NLI models, 300 for the LLM judges due to API cost), and reported calibrated test-set F1.</p>
+<p>Sentence-level: each response gets segmented into sentences with <a href="https://github.com/segment-any-text/wtpsplit">wtpsplit</a>, the verifier scores each <code>(context, sentence)</code> pair independently, and the response-level score is the <strong>min</strong> across sentences. The convention: any unsupported sentence flags the whole response. This is the HALT-RAG (Sept 2025) approach.</p>
+<hr />
+<h2 id="the-headline-result">The headline result<a class="headerlink" href="#the-headline-result" title="Anchor link to this section for reference">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Verifier</th>
+<th>n_test</th>
 <th>AUROC</th>
-<th>F1 (calibrated)</th>
+<th><strong>Calibrated F1</strong></th>
 <th>Per-call cost</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>HHEM</td>
+<td>HHEM single</td>
+<td>2700</td>
 <td>0.813</td>
 <td>0.663</td>
 <td>~$0.0002</td>
 </tr>
 <tr>
-<td>MiniCheck</td>
+<td>MiniCheck single</td>
+<td>2700</td>
 <td>0.836</td>
 <td>0.696</td>
 <td>~$0.0002</td>
 </tr>
 <tr>
-<td><strong>Dual NLI (HHEM + MC)</strong></td>
+<td><strong>Dual NLI (HHEM + MC, min)</strong></td>
+<td>2700</td>
 <td><strong>0.844</strong></td>
 <td><strong>0.706</strong></td>
 <td>~$0.0004</td>
 </tr>
 <tr>
-<td>Sonnet 4.6 judge</td>
-<td>0.846</td>
-<td>0.707 (on 300-ex subset)</td>
+<td><strong>Sonnet 4.6 judge</strong></td>
+<td>300</td>
+<td><strong>0.846</strong></td>
+<td><strong>0.707</strong></td>
+<td>~$0.05</td>
+</tr>
+<tr>
+<td>Triple (HHEM + MC + Sonnet)</td>
+<td>300</td>
+<td>0.861</td>
+<td>0.734</td>
 <td>~$0.05</td>
 </tr>
 </tbody>
 </table>
-<p>Dual NLI matches Sonnet on both AUROC and calibrated F1, at ~250× lower per-call cost. <strong>This is the result that justifies the library's design.</strong></p>
+<p>Dual NLI: AUROC 0.844, F1 0.706.
+Sonnet judge: AUROC 0.846, F1 0.707.</p>
+<p>Statistically indistinguishable on either metric. The Sonnet number has a wider CI because it's on 300 examples instead of 2700 (cost reasons — running Sonnet on the full test was going to be ~$50). But the direction is clear.</p>
+<p><strong>Adding Sonnet on top as a third ensemble member buys you another ~2 F1 points</strong> (0.706 → 0.734) on the 300-example subset where all three scored. Real lift, but only worth it if you've already accepted LLM-judge costs for other reasons.</p>
+<hr />
+<h2 id="what-surprised-me-complementarity">What surprised me: complementarity<a class="headerlink" href="#what-surprised-me-complementarity" title="Anchor link to this section for reference">&para;</a></h2>
+<p>The interesting story isn't the headline number — it's <em>why</em> the ensemble works.</p>
+<p>The two NLI models were trained on different distributions, and it shows in the per-task breakdown:</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>HHEM AUROC</th>
+<th>MiniCheck AUROC</th>
+<th>Sonnet AUROC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QA</strong> (MS MARCO + retrieved passages)</td>
+<td><strong>0.874</strong></td>
+<td>0.839</td>
+<td>0.844</td>
+</tr>
+<tr>
+<td><strong>Summary</strong> (CNN/DailyMail)</td>
+<td>0.759</td>
+<td>0.777</td>
+<td>0.848</td>
+</tr>
+<tr>
+<td><strong>Data2txt</strong> (Yelp records → narrative)</td>
+<td><strong>0.566</strong></td>
+<td>0.702</td>
+<td>0.852</td>
+</tr>
+</tbody>
+</table>
+<p>HHEM is <strong>great at QA</strong> — that's its training distribution. Factoid claims against retrieved passages are exactly what summarization-entailment models see during training.</p>
+<p>HHEM is <strong>bad at Data2txt</strong> — AUROC 0.566 is barely better than random. Turning a structured Yelp record into prose requires a different kind of entailment check (does this narrative actually correspond to the structured fields?) that HHEM was never trained on.</p>
+<p>MiniCheck <strong>fills exactly this gap.</strong> Its synthetic-claim-decomposition training covers structured→narrative inferences. Data2txt AUROC jumps from 0.566 (HHEM alone) to 0.702 (MiniCheck alone) to 0.685 (the dual). The dual loses a tiny bit on Data2txt vs MiniCheck-alone because HHEM's bad scores drag the min down — but gains across the board everywhere else.</p>
+<p><strong>This is the textbook case for an ensemble.</strong> Two models with different blind spots, neither dominant. Min aggregation (HALT-RAG convention: "any model says unsupported → flag") performed best in my runs, but mean is within 0.005 AUROC and gives smoother per-example confidence scores if you care about calibration.</p>
+<p>Why the two NLI models can collectively keep up with Sonnet: Sonnet is uniformly good across tasks (AUROC 0.844–0.852, near-flat) but it's not <em>better-than-best</em> on any single task. HHEM beats Sonnet on QA, MiniCheck nearly ties on Summary. When you compose HHEM and MiniCheck through their strong tasks, you get a verifier that's at-or-above frontier on aggregate.</p>
+<hr />
+<h2 id="what-youd-actually-ship">What you'd actually ship<a class="headerlink" href="#what-youd-actually-ship" title="Anchor link to this section for reference">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">verifiable_rag.verifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DualNLIVerifier</span><span class="p">,</span> <span class="n">HHEMVerifier</span><span class="p">,</span> <span class="n">MiniCheckVerifier</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">parser</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">generator</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">verifier</span><span class="o">=</span><span class="n">DualNLIVerifier</span><span class="p">(</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">HHEMVerifier</span><span class="p">(),</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">MiniCheckVerifier</span><span class="p">(),</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0562</span><span class="p">,</span>   <span class="c1"># fit on RAGTruth-train — re-fit on your domain if it differs</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="p">),</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">pipeline</span><span class="o">.</span><span class="n">ingest</span><span class="p">(</span><span class="s2">&quot;paper.pdf&quot;</span><span class="p">)</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">answer</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="s2">&quot;What did the authors find?&quot;</span><span class="p">)</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># Verification results are aligned by cited_sentence_index back into answer.sentences.</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="n">result_by_idx</span> <span class="o">=</span> <span class="p">{</span><span class="n">vr</span><span class="o">.</span><span class="n">cited_sentence_index</span><span class="p">:</span> <span class="n">vr</span> <span class="k">for</span> <span class="n">vr</span> <span class="ow">in</span> <span class="n">answer</span><span class="o">.</span><span class="n">verification_results</span><span class="p">}</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">sentences</span><span class="p">):</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">vr</span> <span class="o">=</span> <span class="n">result_by_idx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="k">if</span> <span class="n">vr</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vr</span><span class="o">.</span><span class="n">is_supported</span><span class="p">:</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>        <span class="c1"># Downstream UI: render unsupported badge, surface vr.nli_score, etc.</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FLAGGED: </span><span class="si">{</span><span class="n">sentence</span><span class="o">.</span><span class="n">text</span><span class="si">!r}</span><span class="s2"> (nli=</span><span class="si">{</span><span class="n">vr</span><span class="o">.</span><span class="n">nli_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>That's the production configuration. Both NLI models download lazily from HuggingFace on first call (~1.4 GB total, cached forever afterward). After that there's no per-call cost — they run on whatever CPU/GPU you have. On a Modal T4, scoring 2700 RAGTruth responses cost me about 25 cents.</p>
+<p>For comparison, the equivalent Sonnet judge run would cost ~$50 and require an Anthropic API key. The Haiku judge would cost ~$7. Both keep ticking up with every query in production.</p>
+<p>The default threshold (0.0562) was fit on RAGTruth train with min aggregation. <strong>It will not be optimal for every domain.</strong> If you have a different distribution of contexts (legal contracts, medical literature, code), fit your own threshold with the included calibration script — it takes ~50 lines of labeled data and one command.</p>
+<hr />
+<h2 id="the-honest-caveats">The honest caveats<a class="headerlink" href="#the-honest-caveats" title="Anchor link to this section for reference">&para;</a></h2>
+<p><strong>The Sonnet comparison is on 300 examples, not 2700.</strong> Same stratification (100 per task) and same seed, so the comparison is methodologically clean, but the CI on Sonnet's AUROC is wider (±0.045 vs ±0.015 for the dual). I'm confident in "dual matches Sonnet" as a directional claim; I'm not confident the gap is <em>exactly</em> 0.002. The right-side caveat: Sonnet may genuinely be ~3 points better in expectation than this benchmark shows. Even then, the cost-quality tradeoff still strongly favors the dual.</p>
+<p><strong>Haiku-as-judge does not calibrate well on small samples.</strong> I tried it (Haiku 4.5, 300 train, 600 test) and the train-fit threshold collapsed to a knife-edge that didn't transfer — calibrated F1 fell to 0.14 from an in-sample 0.66. The mechanism is real: RAGTruth train has a 46% hallucination base rate vs test's 35%, and Haiku's confidence distribution is near-bimodal (most claims either obviously supported or obviously not). With 300 train examples that combination found a degenerate threshold. Fix: either more train data or a different operating-point criterion (balanced accuracy instead of F1). I'm flagging this as future work; for now Haiku-judge is in the "in-sample exploratory" bin in my published numbers, not the "production-ready" bin.</p>
+<p><strong>RAGTruth is just one benchmark.</strong> The dual matching Sonnet on RAGTruth doesn't guarantee it matches Sonnet on FaithBench, HaluBench, or your domain's hallucinations. FaithBench is currently HF-gated; HaluBench cross-validation is on the backlog.</p>
+<p><strong>Threshold transfer is sensitive to base rate.</strong> Train (46% hall) and test (35% hall) have meaningfully different base rates in RAGTruth. The optimal F1-maximizing threshold depends on base rate, so applying a train-fit threshold to a different-base-rate test introduces some bias. A base-rate-aware calibration (e.g. optimize at fixed precision, or use balanced accuracy) would be more rigorous. The honest takeaway: the published F1 numbers are within a couple of points of the true value, but they're not precise to the third decimal.</p>
+<hr />
+<h2 id="what-this-means-if-youre-building-a-rag-system">What this means if you're building a RAG system<a class="headerlink" href="#what-this-means-if-youre-building-a-rag-system" title="Anchor link to this section for reference">&para;</a></h2>
+<p>Three concrete takeaways:</p>
+<ol>
+<li>
+<p><strong>Don't use a frontier LLM as your default hallucination judge.</strong> It's wildly expensive per call, and on at least one well-tested benchmark a $0.0004 open-source ensemble matches its quality. Save the LLM judge for offline eval and adversarial testing, not real-time verification.</p>
+</li>
+<li>
+<p><strong>Don't use one NLI model — use two.</strong> HHEM alone leaves Data2txt-style outputs basically uncovered. The two models compose to a verifier that's robust across the task distributions you'll see in practice. Cost-wise the second model is "free" in the sense that it doesn't add per-call money, just a one-time download.</p>
+</li>
+<li>
+<p><strong>Calibrate on labeled data, not vibes.</strong> The in-sample best-F1 threshold and the train-fit threshold differ by 1–2 F1 points in my measurements — small but not zero. Reporting in-sample numbers is the most common rigor failure I see in RAG eval; don't do it.</p>
+</li>
+</ol>
+<p><code>DualNLIVerifier</code> ships as the library's recommended default. The full benchmark report (with per-model breakdowns, reproducibility instructions, and source numbers) lives at <a href="https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md">benchmarks/PUBLISHED_ragtruth.md</a>. The library is <a href="https://github.com/firish/rag-rack"><code>verifiable-rag</code> on GitHub</a> — MIT-licensed, on PyPI (<code>pip install verifiable-rag</code>), docs at <a href="https://firish.github.io/rag-rack/">firish.github.io/rag-rack</a>.</p>
+<hr />
+<h2 id="whats-next">What's next<a class="headerlink" href="#whats-next" title="Anchor link to this section for reference">&para;</a></h2>
+<p>The natural follow-ups are sentence-level NLI ensembling (currently response-level), HyDE for query enhancement, late chunking with long-context embedders, and visual citation highlighting in the audit report — see <a href="https://github.com/firish/rag-rack/blob/main/blog/05_what_we_have_and_whats_next.md">the feature roadmap post</a> for the full list of what's in the library today and what's planned for the next few releases.</p>
+<p>If you'd find this kind of library useful — span-grounded citations, calibrated NLI verification, refusal when the system can't ground the answer — drop a star on <a href="https://github.com/firish/rag-rack">the repo</a> or open an issue with your use case. Roadmap priorities get shaped by real users.</p>
+<hr />
+<p><em>verifiable-rag is MIT-licensed and on PyPI (<code>pip install verifiable-rag</code>). Documentation at <a href="https://firish.github.io/rag-rack/">firish.github.io/rag-rack</a>. For the citation-generation half of the story (constrained decoding vs prompted on ALCE), see <a href="https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md">the companion post</a>. Methodology critiques welcome — eval rigor is the whole moat.</em></p>
+<p><em>Find me on <a href="https://x.com/">X</a> / <a href="https://github.com/firish/rag-rack">GitHub</a>. Eval rigor is the whole moat — if you spot a methodology hole, I want to hear about it.</em></p>
 
 
 
