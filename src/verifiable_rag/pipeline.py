@@ -159,7 +159,13 @@ class Pipeline:
 
         avg_nli = sum(nli_scores) / len(nli_scores) if nli_scores else 1.0
         avg_retrieval = sum(r.score for r in retrieved) / len(retrieved) if retrieved else 0.0
-        faithfulness_score = avg_nli if nli_scores else avg_retrieval
+        # The faithfulness score is the average NLI score — calibrated [0, 1].
+        # When no verifier ran, ``avg_nli`` defaults to 1.0 ("no evidence of
+        # unfaithfulness"). The raw retrieval scalar is preserved on
+        # ``faithfulness_components.retrieval_score`` for inspection but is
+        # not used as a fallback — it lives in retrieval-model-output units
+        # (not [0, 1]) and conflating it with NLI confidence was misleading.
+        faithfulness_score = avg_nli
 
         # ----- Surgical correction vs hard refusal -----
         if verification_results and self.strictness != "loose":

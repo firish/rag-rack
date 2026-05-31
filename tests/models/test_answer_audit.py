@@ -256,3 +256,18 @@ def test_audit_trail_mean_nli_is_none_when_no_verifier() -> None:
     audit = a.audit_trail()
     assert audit["mean_nli_score"] is None
     assert audit["n_verified"] == 0
+
+
+@pytest.mark.smoke
+def test_audit_trail_verifier_configured_true_when_verifier_ran() -> None:
+    a = _make_answer(has_verification=True)
+    audit = a.audit_trail()
+    assert audit["verifier_configured"] is True
+
+
+@pytest.mark.smoke
+def test_audit_trail_verifier_configured_false_when_no_verifier() -> None:
+    """Downstream metrics need to know when faithfulness_score is the 1.0 default."""
+    a = _make_answer(has_verification=False)
+    audit = a.audit_trail()
+    assert audit["verifier_configured"] is False

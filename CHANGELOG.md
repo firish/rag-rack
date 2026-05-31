@@ -9,6 +9,32 @@ cycle. Once we hit `1.0` the normal semver promises apply.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-05-31
+
+Patch release. Two small bugfixes spotted during the post-launch
+sanity check from a fresh PyPI install.
+
+### Fixed
+
+- ``verifiable_rag.__version__`` now matches the PyPI metadata version
+  (was stuck at ``"0.1.0"`` in v0.5.0 even though the package was
+  published as 0.5.0).
+- ``Pipeline.faithfulness_score`` no longer falls back to the raw
+  retrieval scalar when no verifier ran. Previously, ``loose``-strictness
+  pipelines without a verifier produced misleading-looking sub-0.1
+  faithfulness scores (the raw retrieval-model output, not a
+  calibrated [0, 1] value). Now defaults to ``1.0`` ("no evidence of
+  unfaithfulness") and the audit surfaces include a new
+  ``verifier_configured: bool`` flag so downstream consumers know
+  whether the score is meaningful.
+- ``Answer.to_html()`` now skips the "Faithfulness" card row entirely
+  when no verifier was configured, and the header reads "no verifier
+  configured" instead of an uninterpretable score.
+
+### Added
+
+- ``Answer.audit_trail()`` includes a new ``verifier_configured`` key.
+
 ## [0.5.0] — 2026-05-28
 
 The library is now usable end-to-end. Five preset pipelines, a YAML config

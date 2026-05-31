@@ -202,6 +202,26 @@ def test_skips_verification_section_when_no_results() -> None:
 
 
 @pytest.mark.smoke
+def test_skips_faithfulness_card_when_no_verifier() -> None:
+    """When no verifier ran, faithfulness_score is the 1.0 default — don't
+    surface it in the report (would be misleading)."""
+    answer = _make_answer(has_verification=False)
+    out = to_html(answer)
+    assert "<h2>Faithfulness</h2>" not in out
+    # Header should say "no verifier configured" instead of a score
+    assert "no verifier configured" in out
+
+
+@pytest.mark.smoke
+def test_shows_faithfulness_card_when_verifier_ran() -> None:
+    """When the verifier ran, the faithfulness section is meaningful — keep it."""
+    answer = _make_answer(has_verification=True)
+    out = to_html(answer)
+    assert "<h2>Faithfulness</h2>" in out
+    assert "no verifier configured" not in out
+
+
+@pytest.mark.smoke
 def test_skips_passages_section_when_no_chunks() -> None:
     answer = _make_answer(has_chunks=False)
     out = to_html(answer)

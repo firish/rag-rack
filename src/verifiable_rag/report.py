@@ -94,10 +94,16 @@ def to_html(answer: "Answer", title: str = "verifiable-rag report") -> str:
         f"<style>{_CSS}</style>\n</head>\n<body>\n"
     )
     parts.append(f"<header><h1>{html.escape(title)}</h1>")
+    verifier_ran = bool(answer.verification_results)
+    faithfulness_label = (
+        f"faithfulness={answer.faithfulness_score:.3f}"
+        if verifier_ran
+        else "no verifier configured"
+    )
     parts.append(
         f"<div class='meta'>strictness={html.escape(str(answer.strictness))} · "
         f"refused={'yes' if answer.was_refused else 'no'} · "
-        f"faithfulness={answer.faithfulness_score:.3f}</div></header>\n"
+        f"{faithfulness_label}</div></header>\n"
     )
 
     # Query
@@ -115,9 +121,12 @@ def to_html(answer: "Answer", title: str = "verifiable-rag report") -> str:
     parts.append("<h2>Answer</h2>")
     parts.append(_render_answer_body(answer))
 
-    # Faithfulness card row
-    parts.append("<h2>Faithfulness</h2>")
-    parts.append(_render_faithfulness(answer))
+    # Faithfulness card row — only meaningful when a verifier ran. Skip the
+    # section entirely when no verifier was configured to avoid surfacing
+    # an uninterpretable 1.0 default + a raw retrieval scalar.
+    if verifier_ran:
+        parts.append("<h2>Faithfulness</h2>")
+        parts.append(_render_faithfulness(answer))
 
     # Per-sentence verification table
     if answer.verification_results:
