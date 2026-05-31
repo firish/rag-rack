@@ -161,3 +161,9 @@ nav:
       - api/report.md
       - api/demo.md
   - Benchmarks: benchmarks/index.md
+  - Blog:
+      - blog/index.md
+      - blog/05_what_we_have_and_whats_next.md
+      - blog/03_verified_rag.md
+      - blog/02_constrained_citations.md
+      - blog/04_litqa2_ablation.md

@@ -21,7 +21,8 @@ On RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NL
 That number is the whole pitch: you don't need a frontier-LLM judge to verify your RAG outputs. Two small NLI models, calibrated honestly, ensembled correctly, get you there for free per call.
 
 [See the full result →](benchmarks/index.md){ .md-button .md-button--primary }
-[Read the blog post →](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md){ .md-button }
+[Read the blog post →](blog/03_verified_rag.md){ .md-button }
+[All posts →](blog/index.md){ .md-button }
 
 ## Quickstart
 
