@@ -160,11 +160,13 @@ class Answer:
             "strictness": self.strictness,
             "was_refused": self.was_refused,
             "refusal_reason": self.refusal_reason,
-            # When verifier_configured is False, faithfulness_score defaults
+            # When verification_ran is False, faithfulness_score defaults
             # to 1.0 — there's no evidence of unfaithfulness, but no
-            # evidence of faithfulness either. Treat with caution in
-            # downstream metrics.
-            "verifier_configured": bool(self.verification_results),
+            # evidence of faithfulness either. Distinct from "verifier
+            # was configured on the Pipeline" — the Pipeline can have a
+            # verifier attached yet skip verification (e.g. when the
+            # generator produced no sentences to verify).
+            "verification_ran": bool(self.verification_results),
             "faithfulness_score": self.faithfulness_score,
             "faithfulness_components": {
                 "retrieval_score": fc.retrieval_score,

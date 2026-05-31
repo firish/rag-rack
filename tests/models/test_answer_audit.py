@@ -259,15 +259,15 @@ def test_audit_trail_mean_nli_is_none_when_no_verifier() -> None:
 
 
 @pytest.mark.smoke
-def test_audit_trail_verifier_configured_true_when_verifier_ran() -> None:
+def test_audit_trail_verification_ran_true_when_verifier_ran() -> None:
     a = _make_answer(has_verification=True)
     audit = a.audit_trail()
-    assert audit["verifier_configured"] is True
+    assert audit["verification_ran"] is True
 
 
 @pytest.mark.smoke
-def test_audit_trail_verifier_configured_false_when_no_verifier() -> None:
+def test_audit_trail_verification_ran_false_when_no_verifier() -> None:
     """Downstream metrics need to know when faithfulness_score is the 1.0 default."""
     a = _make_answer(has_verification=False)
     audit = a.audit_trail()
-    assert audit["verifier_configured"] is False
+    assert audit["verification_ran"] is False

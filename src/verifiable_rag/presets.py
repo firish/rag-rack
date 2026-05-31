@@ -24,6 +24,10 @@ When to use which preset
 | ``hybrid_paranoid`` | Sonnet generation, Dual NLI, hard refusal   | generator + |
 |                     | unless extremely confident                  | Cohere      |
 +---------------------+---------------------------------------------+-------------+
+| ``llm_judge_       | LLM-as-judge verifier (Sonnet 4.6 default). | generator + |
+| verified``          | Strictest single-model verifier; offline    | Cohere      |
+|                     | "ceiling" reference. ~250x cost per call.   |             |
++---------------------+---------------------------------------------+-------------+
 
 For full customization, use :func:`build_pipeline` with explicit knobs,
 or load a YAML config via ``Pipeline.from_yaml(path)``.
@@ -217,6 +221,72 @@ def hybrid_paranoid(
     return pipeline
 
 
+def llm_judge_verified(
+    *,
+    generator_model: str = _DEFAULT_HAIKU,
+    judge_model: str = _DEFAULT_SONNET,
+    judge_threshold: float = 0.5,
+    judge_max_workers: int = 4,
+    index_dir: Path = _DEFAULT_INDEX_DIR,
+    strictness: "Strictness" = "balanced",
+) -> "Pipeline":
+    """LLM-as-judge verifier preset. The strictest single-model option.
+
+    Same retrieval + generator stack as :func:`hybrid_balanced`, but the
+    verifier is a Sonnet 4.6 LLM-judge instead of the Dual NLI ensemble.
+    Sonnet evaluates each generated sentence against its cited spans
+    and returns ``{"supported": bool, "confidence": float}``.
+
+    When to use this
+    ----------------
+    * **Adversarial / audit-grade workflows** where every claim must be
+      verbatim-sourceable.
+    * **Offline eval** as a "ceiling" reference vs the Dual NLI baseline.
+    * **Sensitive domains** (legal, medical, scientific) where the cost
+      of a missed flag exceeds the API spend.
+
+    Cost: ~250x per-call cost vs :func:`hybrid_balanced` (LLM API per
+    sentence vs. local NLI). For most production use cases, Dual NLI
+    is the right default and this preset is the offline reference.
+
+    Requires ``ANTHROPIC_API_KEY`` (both generator and judge) +
+    ``COHERE_API_KEY`` (retrieval).
+    """
+    from verifiable_rag.chunkers import ParentChildChunker
+    from verifiable_rag.embedders import CohereEmbedder
+    from verifiable_rag.generators import ConstrainedCitedGenerator
+    from verifiable_rag.indexers import BM25Index, HybridIndex, LanceDBIndex
+    from verifiable_rag.parsers import (
+        CachingParser,
+        CompositeParser,
+        DoclingParser,
+        PyMuPDFParser,
+    )
+    from verifiable_rag.pipeline import Pipeline
+    from verifiable_rag.rerankers import CohereReranker
+    from verifiable_rag.verifiers import LLMJudgeVerifier, NLIVerifier
+
+    judge = LLMJudgeVerifier(
+        model=judge_model,
+        max_workers=judge_max_workers,
+        num_retries=5,
+    )
+    return Pipeline(
+        parser=CachingParser(
+            CompositeParser(primary=DoclingParser(), fallbacks=[PyMuPDFParser()])
+        ),
+        chunker=ParentChildChunker(max_child_tokens=400, min_child_tokens=100),
+        embedder=CohereEmbedder(),
+        indexer=HybridIndex(dense=LanceDBIndex(uri=index_dir), sparse=BM25Index()),
+        reranker=CohereReranker(),
+        generator=ConstrainedCitedGenerator(model=generator_model),
+        verifier=NLIVerifier(judge, threshold=judge_threshold),
+        strictness=strictness,
+        top_k_retrieve=100,
+        top_k_rerank=10,
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Parametric factory — when none of the presets match
 # --------------------------------------------------------------------------- #
@@ -347,6 +417,7 @@ __all__ = [
     "hybrid_balanced",
     "hybrid_paranoid",
     "hybrid_strict",
+    "llm_judge_verified",
     "local_minimal",
     "local_verified",
 ]

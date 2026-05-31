@@ -9,6 +9,34 @@ cycle. Once we hit `1.0` the normal semver promises apply.
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-05-31
+
+Adds an LLM-as-judge preset for offline ceiling reference + audit-grade
+workflows, plus the generic adapter that makes it possible.
+
+### Added
+
+- :class:`verifiable_rag.verifiers.NLIVerifier` — adapter that turns any
+  :class:`NLIScorer` (``LLMJudgeVerifier``, ``MiniCheckVerifier``,
+  ``ModalHHEMScorer``, …) into a :class:`Verifier`-protocol-compliant
+  Pipeline verifier. Mirrors the same premise-building logic the
+  library uses internally.
+- :func:`verifiable_rag.llm_judge_verified` preset — Cohere retrieval +
+  constrained Haiku generator + Sonnet 4.6 LLM-judge verifier (wrapped
+  via ``NLIVerifier``). Strictest single-model option; offline ceiling
+  reference. ~250x per-call cost vs Dual NLI.
+- ``verifiable_rag.ask(..., preset="llm_judge_verified")`` is the
+  one-liner equivalent.
+
+### Changed
+
+- :meth:`Answer.audit_trail` field rename: ``verifier_configured`` →
+  ``verification_ran``. More accurate — the Pipeline can have a verifier
+  attached yet skip verification when the generator produced no
+  sentences to check. **Breaking** for any code that read the
+  ``verifier_configured`` key from v0.5.1 — update to
+  ``verification_ran``.
+
 ## [0.5.1] — 2026-05-31
 
 Patch release. Two small bugfixes spotted during the post-launch

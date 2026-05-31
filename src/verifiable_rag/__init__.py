@@ -23,11 +23,12 @@ from verifiable_rag.presets import (
     hybrid_balanced,
     hybrid_paranoid,
     hybrid_strict,
+    llm_judge_verified,
     local_minimal,
     local_verified,
 )
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 __all__ = [
     "__version__",
@@ -38,6 +39,7 @@ __all__ = [
     "hybrid_balanced",
     "hybrid_paranoid",
     "hybrid_strict",
+    "llm_judge_verified",
     "local_minimal",
     "local_verified",
     # Models

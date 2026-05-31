@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-rag"
-version = "0.5.1"
+version = "0.5.2"
 description = "Document-grounded Q&A with sentence-level citations and faithfulness verification"
 readme = "README.md"
 license = { text = "MIT" }

@@ -56,6 +56,7 @@ from verifiable_rag.verifiers.modal_remote import (  # noqa: E402
     ModalHHEMScorer,
     ModalMiniCheckScorer,
 )
+from verifiable_rag.verifiers.nli_verifier import NLIVerifier  # noqa: E402
 
 __all__ = [
     "DualNLIVerifier",
@@ -66,5 +67,6 @@ __all__ = [
     "ModalHHEMScorer",
     "ModalMiniCheckScorer",
     "NLIScorer",
+    "NLIVerifier",
     "Verifier",
 ]

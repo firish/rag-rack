@@ -31,6 +31,7 @@ _VALID_PRESETS = (
     "hybrid_balanced",
     "hybrid_strict",
     "hybrid_paranoid",
+    "llm_judge_verified",
 )
 
 
