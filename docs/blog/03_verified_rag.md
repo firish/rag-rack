@@ -1,6 +1,6 @@
 # Verified RAG: every sentence checked
 
-*How a 600M + 770M NLI ensemble matches Claude Sonnet at hallucination detection on RAGTruth — at 1/250th the per-call cost.*
+*How a 600M + 770M NLI ensemble matches Claude Sonnet at hallucination detection on RAGTruth — at less than 1/100th the per-call cost.*
 
 ---
 
@@ -10,7 +10,7 @@ That pitch only holds if the verifier is good. So I spent the last week running 
 
 The headline finding:
 
-> **A dual ensemble of two small NLI models (HHEM-2.1-open + MiniCheck-Flan-T5-Large, combined via min aggregation) matches Claude Sonnet 4.6's hallucination-detection quality on RAGTruth — at roughly 1/250th the per-call cost.**
+> **A dual ensemble of two small NLI models (HHEM-2.1-open + MiniCheck-Flan-T5-Large, combined via min aggregation) matches Claude Sonnet 4.6's hallucination-detection quality on RAGTruth — at less than 1/100th the per-call cost.**
 
 That number deserves an asterisk for sample-size reasons I'll get into. But the direction is clear and reproducible: cheap, open-source NLI verifiers are within striking distance of frontier LLM judges on the metric people actually care about (response-level hallucination F1), and they're already there on AUROC.
 

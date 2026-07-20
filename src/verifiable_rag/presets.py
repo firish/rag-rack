@@ -26,7 +26,7 @@ When to use which preset
 +---------------------+---------------------------------------------+-------------+
 | ``llm_judge_       | LLM-as-judge verifier (Sonnet 4.6 default). | generator + |
 | verified``          | Strictest single-model verifier; offline    | Cohere      |
-|                     | "ceiling" reference. ~250x cost per call.   |             |
+|                     | "ceiling" reference. >100x cost per call.   |             |
 +---------------------+---------------------------------------------+-------------+
 
 For full customization, use :func:`build_pipeline` with explicit knobs,
@@ -245,7 +245,7 @@ def llm_judge_verified(
     * **Sensitive domains** (legal, medical, scientific) where the cost
       of a missed flag exceeds the API spend.
 
-    Cost: ~250x per-call cost vs :func:`hybrid_balanced` (LLM API per
+    Cost: >100x per-call cost vs :func:`hybrid_balanced` (LLM API per
     sentence vs. local NLI). For most production use cases, Dual NLI
     is the right default and this preset is the offline reference.
 

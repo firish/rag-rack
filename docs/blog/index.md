@@ -34,7 +34,7 @@ The honest takeaway: measure where your bottleneck actually is before reaching f
 
 [Read →](03_verified_rag.md){ .md-button }
 
-The result that drives the library's design. On RAGTruth (the canonical 2,700-example RAG hallucination corpus), a dual NLI ensemble of two small open-source models (HHEM-2.1-open + MiniCheck-Flan-T5-Large) matches a Claude Sonnet 4.6 LLM-judge — **AUROC 0.844 vs 0.846 — at roughly 1/250th the per-call cost.**
+The result that drives the library's design. On RAGTruth (the canonical 2,700-example RAG hallucination corpus), a dual NLI ensemble of two small open-source models (HHEM-2.1-open + MiniCheck-Flan-T5-Large) matches a Claude Sonnet 4.6 LLM-judge — **AUROC 0.844 vs 0.846 — at less than 1/100th the per-call cost.**
 
 The interesting story underneath the headline: the two NLI models have *complementary blind spots*. HHEM is strong on QA-style entailment; MiniCheck is strong on data-to-text. Ensembling them at the min-aggregation produces a verifier that's robust across the task distributions you'll see in practice.
 

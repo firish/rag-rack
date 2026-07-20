@@ -17,7 +17,7 @@ A Python library for building RAG pipelines that:
 3. **Refuse when uncertain** — calibrated abstention with a user-tunable strictness slider, not a "say I don't know" prompt.
 4. Are **fully auditable** — inspect retrieval scores, reranker decisions, per-claim NLI results, and a self-contained HTML report per query.
 
-**One benchmark result that drives the design:** on RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models (HHEM-2.1-open + MiniCheck-Flan-T5-Large) matches Claude Sonnet 4.6 as a judge — **AUROC 0.844 vs 0.846 — at ~250× lower per-call cost.** Full result in [benchmarks/PUBLISHED_ragtruth.md](benchmarks/PUBLISHED_ragtruth.md).
+**One benchmark result that drives the design:** on RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models (HHEM-2.1-open + MiniCheck-Flan-T5-Large) matches Claude Sonnet 4.6 as a judge — **AUROC 0.844 vs 0.846 — at >100× lower per-call cost.** Full result in [benchmarks/PUBLISHED_ragtruth.md](benchmarks/PUBLISHED_ragtruth.md).
 
 ## Quickstart
 
@@ -140,7 +140,7 @@ Verifier model weights are **not bundled** in the wheel — they're downloaded l
 | Benchmark | Headline | Report | Blog post |
 |---|---|---|---|
 | **ALCE** (Princeton citation quality) | Constrained decoding beats prompted by +4–7 F1 under dual-LLM-judge cross-validation | [report](benchmarks/PUBLISHED_alce.md) | [post](blog/02_constrained_citations.md) |
-| **RAGTruth** (hallucination detection) | Dual NLI ensemble = Sonnet judge at 1/250× the cost (AUROC 0.844 vs 0.846) | [report](benchmarks/PUBLISHED_ragtruth.md) | [post](blog/03_verified_rag.md) |
+| **RAGTruth** (hallucination detection) | Dual NLI ensemble = Sonnet judge at less than 1/100th the cost (AUROC 0.844 vs 0.846) | [report](benchmarks/PUBLISHED_ragtruth.md) | [post](blog/03_verified_rag.md) |
 | **LitQA2** (biomedical scientific Q&A) | Constrained decoding lifts MC; contextual retrieval is a null result on saturated retrieval | [report](benchmarks/PUBLISHED_litqa2.md) | [post](blog/04_litqa2_ablation.md) |
 
 ## Roadmap

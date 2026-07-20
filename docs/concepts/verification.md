@@ -89,7 +89,7 @@ verifier = LLMJudgeVerifier(
 ```
 
 - **Strengths:** Best-quality single model. Useful as a benchmark ceiling.
-- **Weaknesses:** ~250× higher per-call cost than Dual NLI. API rate limits. Bursty failures under load.
+- **Weaknesses:** >100× higher per-call cost than Dual NLI. API rate limits. Bursty failures under load.
 
 Most production deployments shouldn't use this as the primary verifier. The Dual NLI matches it on RAGTruth; reserve LLM-judge for offline eval and adversarial testing.
 
@@ -151,4 +151,4 @@ These limits are why the audit trail matters: every published number comes with 
 | **Dual NLI (HHEM + MC)** | **0.844** | **0.706** | ~$0.0004 |
 | Sonnet 4.6 judge | 0.846 | 0.707 (on 300-ex subset) | ~$0.05 |
 
-Dual NLI matches Sonnet on both AUROC and calibrated F1, at ~250× lower per-call cost. **This is the result that justifies the library's design.**
+Dual NLI matches Sonnet on both AUROC and calibrated F1, at >100× lower per-call cost. **This is the result that justifies the library's design.**

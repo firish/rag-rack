@@ -113,4 +113,4 @@ See [Verification](../concepts/verification.md) for why dual beats single, and t
 - **You need maximum portability.** HHEM ships ~600 MB of weights from HuggingFace on first use. For air-gapped deployments, consider `LLMJudgeVerifier` with a local LLM endpoint.
 - **You don't care about per-call cost.** If LLM API spend is fine for your use case and you want the strongest single signal, `LLMJudgeVerifier(model="anthropic/claude-sonnet-4-6")` is the ceiling.
 
-For most use cases, the answer is "use the Dual NLI ensemble" — it matches Sonnet judge quality at 1/250× the cost.
+For most use cases, the answer is "use the Dual NLI ensemble" — it matches Sonnet judge quality at less than 1/100th the cost.

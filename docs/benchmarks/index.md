@@ -4,7 +4,7 @@ Every claim the library makes is backed by a numbered, reproducible benchmark re
 
 ## RAGTruth — hallucination detection
 
-The headline result that drives the library's design. Dual NLI ensemble matches a frontier LLM judge at 1/250× the cost.
+The headline result that drives the library's design. Dual NLI ensemble matches a frontier LLM judge at less than 1/100th the cost.
 
 | Verifier | n_test | AUROC | Calibrated F1 | Per-call cost |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@ The headline result that drives the library's design. Dual NLI ensemble matches 
 | Sonnet 4.6 judge | 300 | 0.846 | 0.707 | ~$0.05 |
 | Triple (HHEM + MC + Sonnet) | 300 | 0.861 | 0.734 | ~$0.05 |
 
-**Headline:** the open-source Dual NLI ensemble matches Sonnet 4.6 LLM-judge on AUROC and calibrated F1 — at roughly 1/250th the per-call cost.
+**Headline:** the open-source Dual NLI ensemble matches Sonnet 4.6 LLM-judge on AUROC and calibrated F1 — at less than 1/100th the per-call cost.
 
 [📄 Full report](https://github.com/firish/rag-rack/blob/main/benchmarks/PUBLISHED_ragtruth.md) · [📝 Blog post](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md)
 

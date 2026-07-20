@@ -16,7 +16,7 @@ A Python library for building RAG pipelines that **actually verify** what they s
 
 ## The one finding that drives the design
 
-On RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models matches a Claude Sonnet 4.6 LLM-judge — **AUROC 0.844 vs 0.846 — at ~250× lower per-call cost**.
+On RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models matches a Claude Sonnet 4.6 LLM-judge — **AUROC 0.844 vs 0.846 — at >100× lower per-call cost**.
 
 That number is the whole pitch: you don't need a frontier-LLM judge to verify your RAG outputs. Two small NLI models, calibrated honestly, ensembled correctly, get you there for free per call.
 
@@ -98,7 +98,7 @@ None of it has shipped in a usable library. That's the gap.
 | Benchmark | Headline |
 |---|---|
 | [ALCE](benchmarks/index.md) | Constrained decoding beats prompted by +4–7 F1 under dual-LLM-judge cross-validation |
-| [RAGTruth](benchmarks/index.md) | **Dual NLI ensemble = Sonnet 4.6 judge at 1/250× the per-call cost** |
+| [RAGTruth](benchmarks/index.md) | **Dual NLI ensemble = Sonnet 4.6 judge at less than 1/100th the per-call cost** |
 | [LitQA2](benchmarks/index.md) | Constrained decoding lifts MC accuracy; contextual retrieval is a null result on saturated retrieval |
 
 ## Status

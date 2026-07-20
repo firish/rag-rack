@@ -160,7 +160,7 @@ That's the configuration that gets the published 0.875 on the full LitQA2 test c
 
 ## What's next
 
-LitQA2 is one of three published benchmarks in the library — the others are [ALCE](https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md) (citation generation) and [RAGTruth](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md) (post-hoc faithfulness verification, where a dual NLI ensemble matches a frontier LLM judge at 1/250th the cost).
+LitQA2 is one of three published benchmarks in the library — the others are [ALCE](https://github.com/firish/rag-rack/blob/main/blog/02_constrained_citations.md) (citation generation) and [RAGTruth](https://github.com/firish/rag-rack/blob/main/blog/03_verified_rag.md) (post-hoc faithfulness verification, where a dual NLI ensemble matches a frontier LLM judge at less than 1/100th the cost).
 
 The natural next direction is HyDE for query enhancement, late chunking with long-context embedders, and visual citation highlighting — see [the feature roadmap post](https://github.com/firish/rag-rack/blob/main/blog/05_what_we_have_and_whats_next.md) for what's in the library today and what's planned next.
 

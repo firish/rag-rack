@@ -94,7 +94,7 @@ This is the part that justifies "verifiable" in the name. Four concrete verifier
 - **`HHEMVerifier`** — Vectara's HHEM-2.1-open (~600M params, T5-based NLI). Strong on QA-style entailment.
 - **`MiniCheckVerifier`** — Liyan Tang's MiniCheck-Flan-T5-Large (~770M). Strong on structured-data-to-text claims where HHEM is weak.
 - **`LLMJudgeVerifier`** — LLM-as-judge via LiteLLM. Strict but expensive. Anthropic prompt caching enabled by default on system + premise so per-doc cost stays sane.
-- **`DualNLIVerifier`** ⭐ — HALT-RAG-style ensemble combining two NLI scorers via min / mean / max aggregation. The published RAGTruth baseline shows it matches Sonnet 4.6 LLM-judge at AUROC 0.844 vs 0.846 — **at roughly 1/250th the per-call cost.**
+- **`DualNLIVerifier`** ⭐ — HALT-RAG-style ensemble combining two NLI scorers via min / mean / max aggregation. The published RAGTruth baseline shows it matches Sonnet 4.6 LLM-judge at AUROC 0.844 vs 0.846 — **at less than 1/100th the per-call cost.**
 
 Plus the supporting pieces:
 

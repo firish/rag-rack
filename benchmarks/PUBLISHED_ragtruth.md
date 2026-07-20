@@ -5,7 +5,7 @@
 - **Subject under test:** verifier (post-hoc faithfulness scorer). Pipeline parser/chunker/retriever/generator are not exercised — RAGTruth ships pre-generated `(context, response)` pairs.
 - **Verifiers compared:** HHEM-2.1-open, MiniCheck-Flan-T5-Large, Dual-NLI ensemble, Sonnet 4.6 LLM-judge
 
-## Headline — Dual NLI matches frontier LLM-judge quality at ~250× lower per-call cost
+## Headline — Dual NLI matches frontier LLM-judge quality at >100× lower per-call cost
 
 | Verifier | n_train | n_test | AUROC | **Calibrated F1** | Per-call cost |
 |---|---|---|---|---|---|
@@ -15,7 +15,7 @@
 | Sonnet judge | 300 | 300 | 0.846 | 0.707 | ~$0.05 (Anthropic API) |
 | **Triple (HHEM + MC + Sonnet, min)** | 300 | 300 | **0.861** | **0.734** | ~$0.05 |
 
-**Headline claim:** the open-source **Dual NLI ensemble matches Sonnet 4.6 LLM-judge** (AUROC 0.844 vs 0.846; F1 0.706 vs 0.707) on RAGTruth — at roughly 1/250th the per-call cost. Adding Sonnet as a third member lifts performance another ~2 F1 points on the 300-example subset where all three verifiers scored.
+**Headline claim:** the open-source **Dual NLI ensemble matches Sonnet 4.6 LLM-judge** (AUROC 0.844 vs 0.846; F1 0.706 vs 0.707) on RAGTruth — at less than 1/100th the per-call cost. Adding Sonnet as a third member lifts performance another ~2 F1 points on the 300-example subset where all three verifiers scored.
 
 ## Full calibrated comparison
 
@@ -73,7 +73,7 @@ Caveats on direct comparison: published numbers vary on metric (BACC vs response
 
 ## The substantive finding
 
-**Open-source small-model NLI ensemble matches frontier LLM-judge quality on RAGTruth at ~250× lower per-call cost.** Specifically:
+**Open-source small-model NLI ensemble matches frontier LLM-judge quality on RAGTruth at >100× lower per-call cost.** Specifically:
 
 - **HHEM (0.66 F1) and MiniCheck (0.70 F1)** are individually below the LLM-judge ceiling.
 - **Their min-aggregation ensemble (0.71 F1, 0.84 AUROC)** matches a Sonnet 4.6 LLM-judge (0.71 F1, 0.85 AUROC).

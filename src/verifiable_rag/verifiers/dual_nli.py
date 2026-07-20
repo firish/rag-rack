@@ -17,7 +17,7 @@ Why this is the library's recommended default
 Per [benchmarks/PUBLISHED_ragtruth.md](../../../benchmarks/PUBLISHED_ragtruth.md),
 on RAGTruth the dual NLI ensemble (HHEM + MiniCheck, min aggregation)
 matches a Sonnet 4.6 LLM-judge on AUROC (0.844 vs 0.846) and calibrated
-F1 (0.706 vs 0.707) at ~250× lower per-call cost.
+F1 (0.706 vs 0.707) at >100× lower per-call cost.
 
 Default threshold (0.0562) is the value fit on RAGTruth-train with min
 aggregation across HHEM-2.1-open + MiniCheck-Flan-T5-Large. Users with
