@@ -2,150 +2,150 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://firish.github.io/rag-rack/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/ask/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/chunkers/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/config/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/demo/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/embedders/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/generators/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/indexers/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/models/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/parsers/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/pipeline/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/presets/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/report/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/rerankers/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/api/verifiers/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/benchmarks/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/blog/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/blog/02_constrained_citations/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/blog/03_verified_rag/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/blog/04_litqa2_ablation/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/blog/05_what_we_have_and_whats_next/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/concepts/architecture/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/concepts/citation-flow/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/concepts/configuration/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/concepts/strictness/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/concepts/verification/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/getting-started/installation/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/getting-started/quickstart/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/calibrate-threshold/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/contextual-retrieval/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/local-only-setup/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/observability/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/render-audit-html/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/swap-llm-provider/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/use-hhem-verifier/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
     <url>
          <loc>https://firish.github.io/rag-rack/how-to/yaml-config/</loc>
-         <lastmod>2026-05-31</lastmod>
+         <lastmod>2026-07-20</lastmod>
     </url>
 </urlset>

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2244,7 +2244,7 @@
 </span></code></pre></div>
 <ul>
 <li><strong>Strengths:</strong> Best-quality single model. Useful as a benchmark ceiling.</li>
-<li><strong>Weaknesses:</strong> ~250× higher per-call cost than Dual NLI. API rate limits. Bursty failures under load.</li>
+<li><strong>Weaknesses:</strong> &gt;100× higher per-call cost than Dual NLI. API rate limits. Bursty failures under load.</li>
 </ul>
 <p>Most production deployments shouldn't use this as the primary verifier. The Dual NLI matches it on RAGTruth; reserve LLM-judge for offline eval and adversarial testing.</p>
 <h2 id="aggregation-strategies">Aggregation strategies<a class="headerlink" href="#aggregation-strategies" title="Anchor link to this section for reference">&para;</a></h2>
@@ -2342,7 +2342,7 @@
 </tr>
 </tbody>
 </table>
-<p>Dual NLI matches Sonnet on both AUROC and calibrated F1, at ~250× lower per-call cost. <strong>This is the result that justifies the library's design.</strong></p>
+<p>Dual NLI matches Sonnet on both AUROC and calibrated F1, at &gt;100× lower per-call cost. <strong>This is the result that justifies the library's design.</strong></p>
 
 
 
@@ -2414,7 +2414,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

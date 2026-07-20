@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2045,7 +2045,7 @@
 <a href="https://pypi.org/project/verifiable-rag/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/verifiable-rag.svg" /></a></p>
 <p>A Python library for building RAG pipelines that <strong>actually verify</strong> what they say. Every generated sentence carries a tight pointer to the source span that supports it; every claim is NLI-checked against its cite; the system refuses cleanly when it isn't confident.</p>
 <h2 id="the-one-finding-that-drives-the-design">The one finding that drives the design<a class="headerlink" href="#the-one-finding-that-drives-the-design" title="Anchor link to this section for reference">&para;</a></h2>
-<p>On RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models matches a Claude Sonnet 4.6 LLM-judge — <strong>AUROC 0.844 vs 0.846 — at ~250× lower per-call cost</strong>.</p>
+<p>On RAGTruth (the canonical 2,700-example RAG hallucination benchmark), a dual NLI ensemble of two small open-source models matches a Claude Sonnet 4.6 LLM-judge — <strong>AUROC 0.844 vs 0.846 — at &gt;100× lower per-call cost</strong>.</p>
 <p>That number is the whole pitch: you don't need a frontier-LLM judge to verify your RAG outputs. Two small NLI models, calibrated honestly, ensembled correctly, get you there for free per call.</p>
 <p><a class="md-button md-button--primary" href="benchmarks/">See the full result →</a>
 <a class="md-button" href="blog/03_verified_rag/">Read the blog post →</a>
@@ -2115,7 +2115,7 @@
 </tr>
 <tr>
 <td><a href="benchmarks/">RAGTruth</a></td>
-<td><strong>Dual NLI ensemble = Sonnet 4.6 judge at 1/250× the per-call cost</strong></td>
+<td><strong>Dual NLI ensemble = Sonnet 4.6 judge at less than 1/100<sup>th</sup> the per-call cost</strong></td>
 </tr>
 <tr>
 <td><a href="benchmarks/">LitQA2</a></td>
@@ -2203,7 +2203,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["announce.dismiss", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

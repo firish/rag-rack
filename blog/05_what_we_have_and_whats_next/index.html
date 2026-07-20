@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1927,7 +1927,7 @@
 <li><strong><code>HHEMVerifier</code></strong> — Vectara's HHEM-2.1-open (~600M params, T5-based NLI). Strong on QA-style entailment.</li>
 <li><strong><code>MiniCheckVerifier</code></strong> — Liyan Tang's MiniCheck-Flan-T5-Large (~770M). Strong on structured-data-to-text claims where HHEM is weak.</li>
 <li><strong><code>LLMJudgeVerifier</code></strong> — LLM-as-judge via LiteLLM. Strict but expensive. Anthropic prompt caching enabled by default on system + premise so per-doc cost stays sane.</li>
-<li><strong><code>DualNLIVerifier</code></strong> ⭐ — HALT-RAG-style ensemble combining two NLI scorers via min / mean / max aggregation. The published RAGTruth baseline shows it matches Sonnet 4.6 LLM-judge at AUROC 0.844 vs 0.846 — <strong>at roughly 1/250<sup>th</sup> the per-call cost.</strong></li>
+<li><strong><code>DualNLIVerifier</code></strong> ⭐ — HALT-RAG-style ensemble combining two NLI scorers via min / mean / max aggregation. The published RAGTruth baseline shows it matches Sonnet 4.6 LLM-judge at AUROC 0.844 vs 0.846 — <strong>at less than 1/100<sup>th</sup> the per-call cost.</strong></li>
 </ul>
 <p>Plus the supporting pieces:</p>
 <ul>
@@ -2175,7 +2175,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

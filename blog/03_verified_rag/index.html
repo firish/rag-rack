@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2104,13 +2104,13 @@
 
 
 <h1 id="verified-rag-every-sentence-checked">Verified RAG: every sentence checked<a class="headerlink" href="#verified-rag-every-sentence-checked" title="Anchor link to this section for reference">&para;</a></h1>
-<p><em>How a 600M + 770M NLI ensemble matches Claude Sonnet at hallucination detection on RAGTruth — at 1/250<sup>th</sup> the per-call cost.</em></p>
+<p><em>How a 600M + 770M NLI ensemble matches Claude Sonnet at hallucination detection on RAGTruth — at less than 1/100<sup>th</sup> the per-call cost.</em></p>
 <hr />
 <p>I've been building <a href="https://github.com/firish/rag-rack"><code>verifiable-rag</code></a> — a Python library for document-grounded Q&amp;A that produces sentence-level citations and verifies every claim against its cited span. The pitch is that the system either answers truthfully or refuses; it does not generate plausible-sounding nonsense.</p>
 <p>That pitch only holds if the verifier is good. So I spent the last week running calibrated benchmarks on RAGTruth — the 18K-example canonical hallucination-detection corpus — to figure out <strong>what actually works for production-grade faithfulness verification</strong>.</p>
 <p>The headline finding:</p>
 <blockquote>
-<p><strong>A dual ensemble of two small NLI models (HHEM-2.1-open + MiniCheck-Flan-T5-Large, combined via min aggregation) matches Claude Sonnet 4.6's hallucination-detection quality on RAGTruth — at roughly 1/250<sup>th</sup> the per-call cost.</strong></p>
+<p><strong>A dual ensemble of two small NLI models (HHEM-2.1-open + MiniCheck-Flan-T5-Large, combined via min aggregation) matches Claude Sonnet 4.6's hallucination-detection quality on RAGTruth — at less than 1/100<sup>th</sup> the per-call cost.</strong></p>
 </blockquote>
 <p>That number deserves an asterisk for sample-size reasons I'll get into. But the direction is clear and reproducible: cheap, open-source NLI verifiers are within striking distance of frontier LLM judges on the metric people actually care about (response-level hallucination F1), and they're already there on AUROC.</p>
 <p>Below: how I got there, what surprised me, what the production recommendation is, and where it breaks.</p>
@@ -2362,7 +2362,7 @@ Sonnet judge: AUROC 0.846, F1 0.707.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
